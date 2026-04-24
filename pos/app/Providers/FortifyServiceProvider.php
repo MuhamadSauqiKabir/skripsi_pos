@@ -4,8 +4,11 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Enums\Role;
+use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -40,6 +43,17 @@ class FortifyServiceProvider extends ServiceProvider
     {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::createUsersUsing(CreateNewUser::class);
+        Fortify::authenticateUsing(function (Request $request) {
+            $user = User::query()->where('email', $request->string('email'))->first();
+
+            if ($user && Hash::check($request->string('password')->toString(), $user->password) && $user->role !== Role::Customer) {
+                $user->forceFill(['last_login_at' => now()])->save();
+
+                return $user;
+            }
+
+            return null;
+        });
     }
 
     /**
@@ -49,7 +63,6 @@ class FortifyServiceProvider extends ServiceProvider
     {
         Fortify::loginView(fn (Request $request) => Inertia::render('auth/Login', [
             'canResetPassword' => Features::enabled(Features::resetPasswords()),
-            'canRegister' => Features::enabled(Features::registration()),
             'status' => $request->session()->get('status'),
         ]));
 
@@ -65,8 +78,6 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::verifyEmailView(fn (Request $request) => Inertia::render('auth/VerifyEmail', [
             'status' => $request->session()->get('status'),
         ]));
-
-        Fortify::registerView(fn () => Inertia::render('auth/Register'));
 
         Fortify::twoFactorChallengeView(fn () => Inertia::render('auth/TwoFactorChallenge'));
 

@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Enums\Role;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -14,18 +14,26 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@pos.com',
-            'password' => Hash::make('password'),
-            'email_verified_at' => now(),
-        ]);
+        User::query()->updateOrCreate(
+            ['email' => 'admin@pos.com'],
+            [
+                'name' => 'Legacy Admin',
+                'role' => Role::Admin,
+                'phone' => '080000000000',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ],
+        );
 
-        User::create([
-            'name' => 'Kasir',
-            'email' => 'kasir@pos.com',
-            'password' => Hash::make('password'),
-            'email_verified_at' => now(),
-        ]);
+        User::query()->updateOrCreate(
+            ['email' => 'kasir@pos.com'],
+            [
+                'name' => 'Legacy Kasir',
+                'role' => Role::Employee,
+                'phone' => '089999999999',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ],
+        );
     }
 }

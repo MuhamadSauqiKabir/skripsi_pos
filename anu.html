@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Nineties Coffee</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700;900&family=Be+Vietnam+Pro:wght@400;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#735c00',
+                        'primary-container': '#d4af37',
+                        background: '#faf9f6',
+                        surface: '#faf9f6',
+                        'on-background': '#1a1c1a',
+                        'on-primary': '#ffffff',
+                        'on-primary-container': '#554300',
+                        outline: '#7f7663',
+                        'outline-variant': '#d0c5af',
+                    },
+
+                    fontFamily: {
+                        heading: ['Noto Serif', 'serif'],
+                        body: ['Be Vietnam Pro', 'sans-serif'],
+                    },
+                },
+            },
+        };
+    </script>
+
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings:
+                'FILL' 0,
+                'wght' 400,
+                'GRAD' 0,
+                'opsz' 24;
+        }
+
+        .grainy-bg {
+            background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCsAbig1gCxwAnQeouTtDxltnukq8xp_4RPVqAee5IskPmm_s7lVlHUsPRgEFjDDyKg33LLwiVixCc-XX2WSWW2se4JCMnaMG2SjrbQKddgLHycXxspZszfUt1qDWznc0croDTzPFpDQwFRCmOrXxb7mv7drbdlig5cQxXkuWzFOBDbUVAHM4jCwvcvkrYE67w_qF8oq1KcyDK0u94Eilb4cn3_TMJ1GoW0Q13ifiiF7PF7J9u4WL_n68IftFUABkgFzccqDUi4tD4');
+        }
+
+        .parallax-section {
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background font-body grainy-bg">
+
+    <!-- Header -->
+    <header class="fixed top-0 z-30 w-full border-b border-primary-container/20 bg-[#F5F5DC]/90 backdrop-blur-md shadow-sm lg:pl-72">
+        <div class="flex items-center justify-between px-6 py-4">
+            <h1 class="font-heading text-2xl font-black text-stone-900">
+                Nineties Coffee
+            </h1>
+
+            <nav class="hidden items-center gap-8 md:flex text-sm font-semibold uppercase tracking-wider text-stone-500">
+                <a href="#" class="border-b-2 border-primary-container text-primary-container">Beranda</a>
+                <a href="#" class="hover:text-primary-container transition">Tentang</a>
+                <a href="#" class="hover:text-primary-container transition">Toko</a>
+                <a href="#" class="hover:text-primary-container transition">Menu</a>
+                <a href="#" class="hover:text-primary-container transition">News</a>
+                <a href="#" class="hover:text-primary-container transition">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="fixed left-0 top-0 hidden h-screen w-64 border-r border-primary-container/30 bg-[#F5F5DC] shadow-lg lg:flex lg:flex-col">
+        <div class="p-8">
+            <h2 class="font-heading text-2xl font-bold uppercase tracking-widest text-stone-800">
+                Nineties Coffee
+            </h2>
+            <p class="mt-1 text-xs uppercase tracking-wider text-stone-500">
+                Roastery & Brew Bar
+            </p>
+        </div>
+
+        <nav class="flex-1 space-y-2 px-4">
+            <a href="#" class="flex items-center gap-3 rounded-lg px-4 py-3 text-stone-600 transition hover:bg-stone-100 hover:text-primary-container">
+                <span class="material-symbols-outlined">monitoring</span>
+                <span>Analytics</span>
+            </a>
+
+            <a href="#" class="flex items-center gap-3 rounded-lg px-4 py-3 text-stone-600 transition hover:bg-stone-100 hover:text-primary-container">
+                <span class="material-symbols-outlined">point_of_sale</span>
+                <span>POS Terminal</span>
+            </a>
+
+            <a href="#" class="flex items-center gap-3 rounded-lg px-4 py-3 text-stone-600 transition hover:bg-stone-100 hover:text-primary-container">
+                <span class="material-symbols-outlined">inventory_2</span>
+                <span>Product Management</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="pt-20 lg:ml-64">
+
+        <!-- Hero Section -->
+        <section class="relative flex min-h-screen items-center overflow-hidden">
+            <img
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeZCDgZdyVRnAeNYYRwgzKer3_-3F9ggFVSnGQf8VjOgBt_BKkZcMYJGCjD6e8ZdfsLDxoBDb43YvegbvOR7CGFB6kqejn1dzjlf-gmfL6Qzddkk71auTuY-6R7MtrSfC6G757kf0BFX4t9SHHjnJJYuyGbwv3tSikwfTLQ9MrP8jUQlCByhZTtbvSeC-NGFPbx0MlO9NRkC-2tgUsBpRyw18b4ZhmjTcakns6-yb9g_1ByerBhKfn5mxyp7bLacBMyiUpbQK2wUo"
+                alt="Coffee Hero"
+                class="absolute inset-0 h-full w-full object-cover brightness-50"
+            >
+
+            <div class="relative z-10 container mx-auto px-8">
+                <div class="max-w-3xl text-white">
+                    <span class="mb-4 block text-sm font-semibold tracking-[0.4em] text-primary-container">
+                        SINCE 1990
+                    </span>
+
+                    <h1 class="mb-6 font-heading text-6xl font-bold leading-tight">
+                        Seni Roasting yang Sempurna
+                    </h1>
+
+                    <p class="mb-10 text-xl leading-relaxed text-stone-200">
+                        Menghidupkan kembali nostalgia aroma kopi klasik dalam setiap tetes.
+                        Kami mengkurasi biji kopi terbaik dunia untuk pengalaman tak terlupakan.
+                    </p>
+
+                    <div class="flex flex-wrap gap-4">
+                        <button class="bg-primary-container px-8 py-4 font-semibold text-on-primary-container transition hover:brightness-110">
+                            Jelajahi Koleksi
+                        </button>
+
+                        <button class="border border-white/40 px-8 py-4 font-semibold text-white backdrop-blur-sm transition hover:bg-white/10">
+                            Reservasi Meja
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-stone-900 px-8 py-20 text-white">
+            <div class="container mx-auto grid gap-12 md:grid-cols-4">
+                <div>
+                    <h3 class="mb-6 font-heading text-3xl font-bold">
+                        Nineties Coffee
+                    </h3>
+
+                    <p class="leading-relaxed text-stone-400">
+                        Membawa tradisi kopi terbaik ke dalam gaya hidup modern.
+                        Kualitas tanpa kompromi sejak 1990.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="mb-6 font-semibold uppercase tracking-widest text-primary-container">
+                        Quick Links
+                    </h4>
+
+                    <ul class="space-y-3 text-stone-400">
+                        <li><a href="#" class="hover:text-white">Our Roastery</a></li>
+                        <li><a href="#" class="hover:text-white">Wholesale</a></li>
+                        <li><a href="#" class="hover:text-white">Brewing Guides</a></li>
+                        <li><a href="#" class="hover:text-white">Shipping Policy</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="mb-6 font-semibold uppercase tracking-widest text-primary-container">
+                        Shop
+                    </h4>
+
+                    <ul class="space-y-3 text-stone-400">
+                        <li><a href="#" class="hover:text-white">Single Origin</a></li>
+                        <li><a href="#" class="hover:text-white">Signature Blends</a></li>
+                        <li><a href="#" class="hover:text-white">Equipment</a></li>
+                        <li><a href="#" class="hover:text-white">Merchandise</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="mb-6 font-semibold uppercase tracking-widest text-primary-container">
+                        Visit Us
+                    </h4>
+
+                    <div class="space-y-3 text-stone-400">
+                        <p>Jl. Senopati No. 90, Jakarta Selatan</p>
+                        <p>07:00 - 22:00 WIB</p>
+                        <p>hello@ninetiescoffee.id</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container mx-auto mt-16 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 md:flex-row">
+                <p class="text-sm text-stone-500">
+                    © 2026 Nineties Coffee. All Rights Reserved.
+                </p>
+
+                <div class="flex gap-6 text-sm uppercase tracking-wider text-stone-500">
+                    <a href="#" class="hover:text-white">Privacy Policy</a>
+                    <a href="#" class="hover:text-white">Terms of Service</a>
+                </div>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- Floating Action Button -->
+    <button class="fixed bottom-8 right-8 flex h-14 w-14 items-center justify-center rounded-full bg-primary-container text-on-primary-container shadow-2xl transition hover:scale-110">
+        <span class="material-symbols-outlined">shopping_bag</span>
+    </button>
+
+</body>
+</html>

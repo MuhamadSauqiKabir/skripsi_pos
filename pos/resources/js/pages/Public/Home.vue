@@ -5,6 +5,10 @@ defineOptions({ layout: PublicLayout });
 
 defineProps<{
     featuredMenus: Array<any>;
+    heroContent: {
+        title: string;
+        subtitle: string;
+    };
 }>();
 </script>
 
@@ -22,16 +26,16 @@ defineProps<{
                 <div class="max-w-3xl">
                     <span class="mb-4 block text-xs font-semibold uppercase tracking-[0.35em] text-brand-gold">Feels Like Home</span>
                     <h1 class="font-serif text-5xl font-bold leading-tight md:text-7xl">
-                        Kembali ke rasa, menetap di jiwa.
+                        {{ heroContent.title }}
                     </h1>
                     <p class="mt-6 max-w-2xl text-lg leading-8 text-white/75">
-                        Nineties Coffee menghadirkan kehangatan cafe modern dengan sentuhan nostalgia, pelayanan ramah, dan pengalaman digital untuk order meja dan pembayaran QRIS.
+                        {{ heroContent.subtitle }}
                     </p>
                     <div class="mt-10 flex flex-wrap gap-4">
                         <a href="/pesan-menu" class="rounded-xl bg-brand-gold px-7 py-4 text-sm font-bold uppercase tracking-[0.18em] text-brand-espresso transition hover:brightness-110">
                             Jelajahi Menu
                         </a>
-                        <a href="/store" class="rounded-xl border border-white/30 px-7 py-4 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-white/10">
+                        <a href="/contacts" class="rounded-xl border border-white/30 px-7 py-4 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-white/10">
                             Reservasi Mood
                         </a>
                     </div>

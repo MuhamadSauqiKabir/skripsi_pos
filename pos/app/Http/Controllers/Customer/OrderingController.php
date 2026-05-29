@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Enums\PaymentChannel;
+use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Models\CustomerFeedback;
 use App\Models\DiningTable;
@@ -35,7 +36,7 @@ class OrderingController extends Controller
         return Inertia::render('Customer/Checkout', [
             'table' => $this->table($token),
             'paymentChannels' => [
-                ['value' => PaymentChannel::Qris->value, 'label' => 'QRIS Xendit'],
+                ['value' => PaymentChannel::Qris->value, 'label' => 'E-wallet Midtrans'],
                 ['value' => PaymentChannel::Cash->value, 'label' => 'Bayar di kasir'],
             ],
         ]);
@@ -59,6 +60,9 @@ class OrderingController extends Controller
 
         $order = $this->orderService->create($payload, $table, null, $request);
 
+        session(['customer_phone' => $payload['customer']['phone']]);
+        cookie()->queue('customer_phone', $payload['customer']['phone'], 60 * 24 * 365 * 5); // 5 years
+
         return to_route('customer.track', $order->public_id)
             ->with('success', 'Pesanan berhasil dibuat.');
     }
@@ -70,9 +74,43 @@ class OrderingController extends Controller
             ->where('public_id', $publicId)
             ->firstOrFail();
 
+        // Ensure persistence if they visit via a direct link
+        if ($order->customer) {
+            session(['customer_phone' => $order->customer->phone]);
+            cookie()->queue('customer_phone', $order->customer->phone, 60 * 24 * 365 * 5);
+        }
+
+        $payment = $order->payments()->latest()->first();
+        if ($payment && $payment->provider === 'midtrans' && $payment->status === PaymentStatus::Pending) {
+            $payment = app(\App\Services\MidtransPaymentService::class)->checkStatus($payment);
+            if ($payment->status === PaymentStatus::Settlement) {
+                $this->orderService->markPaymentSettled($payment);
+                $order->refresh();
+            }
+        }
+
         return Inertia::render('Customer/Track', [
             'order' => $order,
             'payment' => $order->payments()->latest()->first(),
+        ]);
+    }
+
+    public function history(Request $request): Response|RedirectResponse
+    {
+        $phone = session('customer_phone') ?? $request->cookie('customer_phone');
+
+        if (! $phone) {
+            return to_route('public.menu');
+        }
+
+        $orders = Order::query()
+            ->with('items', 'payments')
+            ->whereHas('customer', fn ($q) => $q->where('phone', $phone))
+            ->latest()
+            ->get();
+
+        return Inertia::render('Customer/History', [
+            'orders' => $orders,
         ]);
     }
 
@@ -98,7 +136,7 @@ class OrderingController extends Controller
             $order->customer->update(['satisfaction_rating' => $data['rating']]);
         }
 
-        return back()->with('success', 'Terima kasih atas penilaian Anda.');
+        return to_route('public.home')->with('success', 'Terima kasih atas penilaian Anda. Silakan jelajahi website kami!');
     }
 
     private function table(string $token): DiningTable

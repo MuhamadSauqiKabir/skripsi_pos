@@ -13,7 +13,7 @@ it('allows staff roles to access dashboard', function () {
         ->assertRedirect('/dashboard/overview');
 });
 
-it('blocks employee from owner menu management endpoints', function () {
+it('blocks employee from admin menu management endpoints', function () {
     $user = User::factory()->create([
         'role' => Role::Employee,
     ]);

@@ -1,9 +1,13 @@
 <template>
-    <div class="grid gap-4 md:grid-cols-2">
-        <div class="rounded-2xl bg-slate-50 p-4 text-sm text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+    <div class="gap-4 md:grid-cols-2 grid">
+        <div
+            class="rounded-lg p-4 text-sm bg-[#f1ece3] text-[#6d6255] dark:bg-[#28322e] dark:text-[#c8bdaa]"
+        >
             Export Weekly / Ekspor Mingguan
         </div>
-        <div class="rounded-2xl bg-slate-50 p-4 text-sm text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+        <div
+            class="rounded-lg p-4 text-sm bg-[#f1ece3] text-[#6d6255] dark:bg-[#28322e] dark:text-[#c8bdaa]"
+        >
             Gross Profit, Top Menu, CSAT, Table Efficiency
         </div>
     </div>

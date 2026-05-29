@@ -12,12 +12,30 @@ const form = useForm({
 <template>
     <Head title="Confirm Password" />
 
-    <form class="panel-card form-grid" @submit.prevent="form.post('/user/confirm-password')">
-        <div>
-            <p class="eyebrow">Security Check</p>
+    <form
+        class="gap-4 grid"
+        @submit.prevent="form.post('/user/confirm-password')"
+    >
+        <div class="nineties-auth-heading">
+            <p>Security Check</p>
             <h2>Konfirmasi password</h2>
         </div>
-        <input v-model="form.password" type="password" placeholder="Password saat ini" />
-        <button class="primary-button" type="submit">Konfirmasi</button>
+        <label class="nineties-field">
+            <span>Password Saat Ini</span>
+            <input
+                v-model="form.password"
+                class="nineties-input"
+                type="password"
+                autocomplete="current-password"
+                placeholder="Password saat ini"
+            />
+        </label>
+        <button
+            class="nineties-auth-submit"
+            type="submit"
+            :disabled="form.processing"
+        >
+            Konfirmasi
+        </button>
     </form>
 </template>

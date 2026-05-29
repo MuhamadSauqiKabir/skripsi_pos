@@ -12,12 +12,23 @@ const form = useForm({});
 <template>
     <Head title="Verify Email" />
 
-    <form class="panel-card form-grid" @submit.prevent="form.post('/email/verification-notification')">
-        <div>
-            <p class="eyebrow">Email Verification</p>
+    <form
+        class="gap-4 grid"
+        @submit.prevent="form.post('/email/verification-notification')"
+    >
+        <div class="nineties-auth-heading">
+            <p>Email Verification</p>
             <h2>Verifikasi email staff</h2>
-            <p class="muted">Klik tombol di bawah untuk mengirim ulang link verifikasi.</p>
         </div>
-        <button class="primary-button" type="submit">Kirim Ulang Verifikasi</button>
+        <p class="nineties-auth-copy">
+            Klik tombol di bawah untuk mengirim ulang link verifikasi.
+        </p>
+        <button
+            class="nineties-auth-submit"
+            type="submit"
+            :disabled="form.processing"
+        >
+            Kirim Ulang Verifikasi
+        </button>
     </form>
 </template>

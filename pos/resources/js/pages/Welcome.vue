@@ -14,7 +14,7 @@ import { Head, Link } from '@inertiajs/vue3';
                     <span>Nineties Coffee</span>
                 </h1>
                 <p class="hero-text">
-                    Sistem ini menggabungkan pemesanan meja via QR code, pembayaran QRIS Xendit,
+                    Sistem ini menggabungkan pemesanan meja via QR code, pembayaran E-wallet Midtrans,
                     dashboard bisnis, peringatan stok, dan prediksi menu populer minggu depan.
                 </p>
 

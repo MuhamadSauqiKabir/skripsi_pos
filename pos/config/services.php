@@ -35,16 +35,14 @@ return [
         ],
     ],
 
-    'xendit' => [
-        'base_url' => env('XENDIT_BASE_URL', 'https://api.xendit.co'),
-        'secret_key' => env('XENDIT_SECRET_KEY'),
-        'webhook_token' => env('XENDIT_WEBHOOK_TOKEN'),
+
+
+    'midtrans' => [
+        'server_key' => env('MIDTRANS_SERVER_KEY'),
+        'client_key' => env('MIDTRANS_CLIENT_KEY'),
+        'is_production' => env('MIDTRANS_IS_PRODUCTION', false),
     ],
 
-    'rajaongkir' => [
-        'base_url' => env('RAJAONGKIR_BASE_URL', 'https://rajaongkir.komerce.id/api/v1'),
-        'api_key' => env('RAJAONGKIR_API_KEY'),
-        'origin_subdistrict_id' => env('RAJAONGKIR_ORIGIN_SUBDISTRICT_ID'),
-    ],
+
 
 ];

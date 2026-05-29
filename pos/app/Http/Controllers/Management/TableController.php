@@ -23,6 +23,7 @@ class TableController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:50'],
             'capacity' => ['required', 'integer', 'min:1', 'max:20'],
+            'floor' => ['required', 'integer', 'min:1', 'max:3'],
             'coordinate_x' => ['required', 'numeric'],
             'coordinate_y' => ['required', 'numeric'],
         ]);
@@ -36,5 +37,35 @@ class TableController extends Controller
         $this->auditLogService->log($request->user()?->id, 'table.created', 'dining_table', $table->id, $data, $request);
 
         return back()->with('success', 'Meja dan QR code berhasil dibuat.');
+    }
+
+    public function update(Request $request, DiningTable $table): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:50'],
+            'capacity' => ['required', 'integer', 'min:1', 'max:20'],
+            'floor' => ['required', 'integer', 'min:1', 'max:3'],
+            'is_active' => ['required', 'boolean'],
+        ]);
+
+        $table->update($data);
+
+        $this->auditLogService->log($request->user()?->id, 'table.updated', 'dining_table', $table->id, $data, $request);
+
+        return back()->with('success', 'Data meja berhasil diperbarui.');
+    }
+
+    public function destroy(DiningTable $table): RedirectResponse
+    {
+        if ($table->orders()->whereIn('status', ['paid', 'brewing', 'ready'])->exists()) {
+            return back()->with('error', 'Meja tidak bisa dihapus karena masih memiliki pesanan aktif.');
+        }
+
+        $tableId = $table->id;
+        $table->delete();
+
+        $this->auditLogService->log(auth()->id(), 'table.deleted', 'dining_table', $tableId, null, request());
+
+        return back()->with('success', 'Meja berhasil dihapus.');
     }
 }

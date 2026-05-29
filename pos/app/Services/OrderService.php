@@ -21,9 +21,8 @@ use Throwable;
 class OrderService
 {
     public function __construct(
-        private readonly DiscountService $discountService,
         private readonly InventoryService $inventoryService,
-        private readonly XenditPaymentService $xenditPaymentService,
+        private readonly MidtransPaymentService $midtransPaymentService,
         private readonly ReceiptService $receiptService,
         private readonly AuditLogService $auditLogService,
     ) {
@@ -72,9 +71,8 @@ class OrderService
 
             $subtotal = $items->sum('line_total');
             $grossProfit = $items->sum('line_profit');
-            $discount = $this->discountService->calculate($customer, $subtotal);
-            $taxAmount = round(($subtotal - $discount['amount']) * 0.11, 2);
-            $totalAmount = max(0, $subtotal - $discount['amount'] + $taxAmount);
+            $taxAmount = round($subtotal * 0.11, 2);
+            $totalAmount = $subtotal + $taxAmount;
             $paymentChannel = PaymentChannel::from($payload['payment_channel']);
 
             $order = Order::create([
@@ -82,19 +80,16 @@ class OrderService
                 'customer_profile_id' => $customer->id,
                 'dining_table_id' => $table?->id,
                 'created_by' => $actor?->id,
-                'status' => $paymentChannel === PaymentChannel::Qris ? OrderStatus::AwaitingPayment : OrderStatus::Paid,
-                'payment_status' => $paymentChannel === PaymentChannel::Qris ? PaymentStatus::Pending : PaymentStatus::Settlement,
+                'status' => OrderStatus::AwaitingPayment,
+                'payment_status' => PaymentStatus::Pending,
                 'payment_channel' => $paymentChannel,
                 'subtotal' => $subtotal,
-                'discount_amount' => $discount['amount'],
                 'tax_amount' => $taxAmount,
                 'total_amount' => $totalAmount,
                 'gross_profit' => $grossProfit,
-                'discount_reason' => $discount['reason'],
-                'discount_breakdown' => $discount['breakdown'],
                 'notes' => $payload['notes'] ?? null,
                 'ordered_at' => now(),
-                'paid_at' => $paymentChannel === PaymentChannel::Cash ? now() : null,
+                'paid_at' => null,
             ]);
 
             $items->each(function (array $item) use ($order): void {
@@ -114,19 +109,16 @@ class OrderService
             $this->inventoryService->deductForOrder($order);
 
             if ($paymentChannel === PaymentChannel::Qris) {
-                $this->xenditPaymentService->createQrisPayment($order);
+                $this->midtransPaymentService->createPayment($order);
             } else {
                 Payment::create([
                     'order_id' => $order->id,
                     'channel' => PaymentChannel::Cash->value,
-                    'status' => PaymentStatus::Settlement->value,
+                    'status' => PaymentStatus::Pending->value,
                     'provider' => 'cashier',
                     'reference_id' => 'CASH-'.Str::upper(Str::random(10)),
-                    'settled_at' => now(),
+                    'settled_at' => null,
                 ]);
-
-                $this->receiptService->generateEscPos($order);
-                $this->receiptService->sendDigitalReceipt($order);
             }
 
             $customer->increment('visit_count');
@@ -175,6 +167,24 @@ class OrderService
 
         if ($status === OrderStatus::Completed) {
             $attributes['completed_at'] = now();
+        }
+
+        // Auto-settle payment if cashier manually marks order as Paid and it was Pending
+        if ($status === OrderStatus::Paid && $order->payment_status === PaymentStatus::Pending) {
+            $attributes['payment_status'] = PaymentStatus::Settlement;
+            $attributes['paid_at'] = now();
+
+            $payment = $order->payments()->latest()->first();
+            if ($payment) {
+                $payment->update([
+                    'status' => PaymentStatus::Settlement->value,
+                    'settled_at' => now(),
+                ]);
+            }
+            
+            // Generate receipts now that payment is confirmed
+            $this->receiptService->generateEscPos($order);
+            $this->receiptService->sendDigitalReceipt($order);
         }
 
         $order->update($attributes);

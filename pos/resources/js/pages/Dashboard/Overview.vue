@@ -1,102 +1,300 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import Chart from 'primevue/chart';
+import { computed } from 'vue';
 
 defineOptions({ layout: AppLayout });
 
-defineProps<{
-    analytics: Record<string, number>;
-    topMenus: Array<any>;
-    predictions: Array<any>;
-    salesByDay: Array<{ day: string; total: number }>;
+type Analytics = {
+    activeOrders: number;
+    weeklyRevenue: number;
+    grossProfit: number;
+    averageRating: number;
+};
+
+type TopMenu = {
+    id: number;
+    name: string;
+    sold_qty: number;
+};
+
+type Prediction = {
+    id: number;
+    predicted_qty: number;
+    trend_score: number;
+    menu_item?: {
+        name?: string;
+    };
+};
+
+type SalesByDay = {
+    day: string;
+    total: number;
+};
+
+const props = defineProps<{
+    analytics: Analytics;
+    topMenus: TopMenu[];
+    predictions: Prediction[];
+    salesByDay: SalesByDay[];
     bentoCards: Array<{ title: string; value: number | string; meta: string }>;
 }>();
+
+const formatCurrency = (value: number | string | null | undefined) =>
+    `Rp ${Number(value || 0).toLocaleString('id-ID')}`;
+
+const formatCompactCurrency = (value: number | string) =>
+    new Intl.NumberFormat('id-ID', {
+        notation: 'compact',
+        maximumFractionDigits: 1,
+    }).format(Number(value || 0));
+
+const formatDay = (value: string) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return new Intl.DateTimeFormat('id-ID', {
+        day: '2-digit',
+        month: 'short',
+    }).format(date);
+};
+
+const metricCards = computed(() => [
+    {
+        title: 'Revenue',
+        value: formatCurrency(props.analytics.weeklyRevenue),
+        meta: 'Minggu ini',
+        icon: 'payments',
+        trend: '+12.5%',
+    },
+    {
+        title: 'Gross Profit',
+        value: formatCurrency(props.analytics.grossProfit),
+        meta: 'Laba kotor',
+        icon: 'account_balance_wallet',
+        trend: '+8.2%',
+    },
+    {
+        title: 'Orders',
+        value: props.analytics.activeOrders || 0,
+        meta: 'Pesanan aktif',
+        icon: 'shopping_bag',
+        trend: 'Stable',
+    },
+    {
+        title: 'CSAT',
+        value: `${props.analytics.averageRating || 0}/5.0`,
+        meta: 'Kepuasan',
+        icon: 'stars',
+        trend: 'Perfect',
+    },
+]);
+
+const salesChartData = computed(() => ({
+    labels: props.salesByDay.map((row) => formatDay(row.day)),
+    datasets: [
+        {
+            label: 'Revenue',
+            data: props.salesByDay.map((row) => Number(row.total || 0)),
+            fill: true,
+            borderColor: '#3d2b1f',
+            backgroundColor: 'rgba(61, 43, 31, 0.05)',
+            tension: 0.4,
+            pointRadius: 4,
+            pointBackgroundColor: '#3d2b1f',
+            borderWidth: 3,
+        },
+    ],
+}));
+
+const salesChartOptions = computed(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: { display: false },
+        tooltip: {
+            backgroundColor: '#3d2b1f',
+            titleFont: { family: 'Plus Jakarta Sans', size: 12 },
+            bodyFont: { family: 'Plus Jakarta Sans', size: 14, weight: 'bold' },
+            padding: 12,
+            cornerRadius: 8,
+            callbacks: {
+                label: (context: any) => ` ${formatCurrency(context.raw)}`,
+            },
+        },
+    },
+    scales: {
+        x: {
+            grid: { display: false },
+            ticks: { color: '#9b8a72', font: { family: 'Plus Jakarta Sans', size: 11, weight: 600 } },
+        },
+        y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(155, 138, 114, 0.1)', drawBorder: false },
+            ticks: {
+                color: '#9b8a72',
+                font: { family: 'Plus Jakarta Sans', size: 11 },
+                callback: (value: any) => formatCompactCurrency(value),
+            },
+        },
+    },
+}));
 </script>
 
 <template>
-    <div class="grid gap-4 xl:grid-cols-12">
-        <section class="rounded-3xl bg-white p-6 dark:bg-slate-900 xl:col-span-7">
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Dashboard / Dasbor</p>
-            <h2 class="mt-3 font-serif text-4xl font-bold">Nineties Coffee Performance Hub</h2>
-            <p class="mt-4 max-w-2xl text-sm leading-7 text-slate-500 dark:text-slate-400">
-                Ringkasan performa bisnis, pesanan aktif, prediksi stok, dan insight operasional untuk owner, kasir, dan barista.
-            </p>
-
-            <div class="mt-8 grid gap-3 md:grid-cols-2">
-                <div class="rounded-2xl bg-slate-50 p-5 dark:bg-slate-800/70">
-                    <p class="text-xs uppercase tracking-[0.18em] text-slate-400">Revenue / Pendapatan</p>
-                    <strong class="mt-2 block text-3xl">Rp {{ Number(analytics.weeklyRevenue).toLocaleString('id-ID') }}</strong>
+    <div class="space-y-6">
+        <!-- Header Section -->
+        <header class="relative overflow-hidden rounded-2xl bg-[#3d2b1f] p-8 text-[#f7f2e8] shadow-xl">
+            <div class="relative z-10 flex flex-col justify-between gap-6 md:flex-row md:items-center">
+                <div class="space-y-2">
+                    <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em]">
+                        <span class="relative flex h-2 w-2">
+                            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
+                        </span>
+                        System Online
+                    </div>
+                    <h1 class="font-serif text-3xl font-bold tracking-tight md:text-4xl">
+                        {{ $page.props.settings?.shop_name || 'Nineties Coffee' }} Performance Hub
+                    </h1>
+                    <p class="max-w-xl text-sm leading-relaxed text-[#f7f2e8]/70">
+                        Pantau metrik operasional, tren penjualan, dan efisiensi stok secara real-time dari satu pusat kendali profesional.
+                    </p>
                 </div>
-                <div class="rounded-2xl bg-slate-50 p-5 dark:bg-slate-800/70">
-                    <p class="text-xs uppercase tracking-[0.18em] text-slate-400">Profit / Laba</p>
-                    <strong class="mt-2 block text-3xl">Rp {{ Number(analytics.grossProfit).toLocaleString('id-ID') }}</strong>
+                <div class="flex items-center gap-4 border-l border-white/10 pl-6">
+                    <div class="text-right">
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-white/40">Active Orders</p>
+                        <p class="text-3xl font-black">{{ analytics.activeOrders }}</p>
+                    </div>
+                    <span class="material-symbols-outlined text-4xl text-white/20">monitoring</span>
                 </div>
             </div>
-        </section>
+            <!-- Decorative background element -->
+            <div class="absolute -right-10 -top-20 h-64 w-64 rounded-full bg-white/5 blur-3xl"></div>
+        </header>
 
-        <section class="grid gap-4 sm:grid-cols-2 xl:col-span-5">
-            <article v-for="item in bentoCards" :key="item.title" class="rounded-3xl bg-white p-5 dark:bg-slate-900">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{{ item.title }}</p>
-                <strong class="mt-4 block text-3xl">{{ item.value }}</strong>
-                <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">{{ item.meta }}</p>
+        <!-- Metric Grid -->
+        <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <article
+                v-for="item in metricCards"
+                :key="item.title"
+                class="group relative overflow-hidden rounded-xl bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md dark:bg-[#1d2521]"
+            >
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-[#9b8a72]">
+                            {{ item.title }}
+                        </p>
+                        <h3 class="mt-2 text-2xl font-bold text-[#3d2b1f] dark:text-[#f7f2e8]">
+                            {{ item.value }}
+                        </h3>
+                    </div>
+                    <div class="rounded-lg bg-[#f7f2e8] p-2 text-[#3d2b1f] group-hover:bg-[#3d2b1f] group-hover:text-[#f7f2e8] transition-colors">
+                        <span class="material-symbols-outlined text-xl">{{ item.icon }}</span>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center gap-2">
+                    <span :class="[
+                        'text-[10px] font-bold px-1.5 py-0.5 rounded',
+                        item.trend.startsWith('+') ? 'bg-green-100 text-green-700' : 'bg-[#f1ece3] text-[#7a6a58]'
+                    ]">
+                        {{ item.trend }}
+                    </span>
+                    <span class="text-[11px] text-[#9b8a72]">{{ item.meta }}</span>
+                </div>
             </article>
         </section>
 
-        <section class="rounded-3xl bg-white p-6 dark:bg-slate-900 xl:col-span-5">
-            <div class="flex items-center justify-between">
-                <h3 class="font-serif text-2xl font-bold">Top Menu / Menu Terlaris</h3>
-                <span class="text-xs uppercase tracking-[0.18em] text-slate-400">Top 6</span>
-            </div>
-            <div class="mt-6 space-y-3">
-                <div v-for="item in topMenus" :key="item.id" class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-4 dark:bg-slate-800/70">
+        <!-- Main Content Grid -->
+        <div class="grid gap-6 lg:grid-cols-12">
+            <!-- Sales Chart -->
+            <section class="rounded-2xl bg-white p-6 shadow-sm lg:col-span-8 dark:bg-[#1d2521]">
+                <div class="mb-8 flex items-center justify-between">
                     <div>
-                        <strong class="block">{{ item.name }}</strong>
-                        <span class="text-sm text-slate-500 dark:text-slate-400">{{ item.sold_qty }} terjual</span>
+                        <h3 class="font-serif text-xl font-bold text-[#3d2b1f] dark:text-[#f7f2e8]">Sales Trend / Tren Penjualan</h3>
+                        <p class="text-xs text-[#9b8a72]">Analisis pendapatan 7 hari terakhir</p>
                     </div>
-                    <span class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Top</span>
-                </div>
-            </div>
-        </section>
-
-        <section class="rounded-3xl bg-white p-6 dark:bg-slate-900 xl:col-span-4">
-            <div class="flex items-center justify-between">
-                <h3 class="font-serif text-2xl font-bold">Forecast / Prediksi</h3>
-                <span class="text-xs uppercase tracking-[0.18em] text-slate-400">Next Week</span>
-            </div>
-            <div class="mt-6 space-y-3">
-                <article v-for="prediction in predictions" :key="prediction.id" class="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/70">
-                    <strong class="block">{{ prediction.menu_item?.name }}</strong>
-                    <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Prediksi {{ prediction.predicted_qty }} porsi</p>
-                    <p class="mt-2 text-xs uppercase tracking-[0.18em] text-slate-400">Trend {{ prediction.trend_score }}%</p>
-                </article>
-            </div>
-        </section>
-
-        <section class="rounded-3xl bg-white p-6 dark:bg-slate-900 xl:col-span-3">
-            <h3 class="font-serif text-2xl font-bold">Live Status / Status Aktif</h3>
-            <div class="mt-6 rounded-2xl bg-slate-50 p-5 dark:bg-slate-800/70">
-                <p class="text-xs uppercase tracking-[0.18em] text-slate-400">Active Orders / Pesanan Aktif</p>
-                <strong class="mt-3 block text-4xl">{{ analytics.activeOrders }}</strong>
-            </div>
-            <div class="mt-4 rounded-2xl bg-slate-50 p-5 dark:bg-slate-800/70">
-                <p class="text-xs uppercase tracking-[0.18em] text-slate-400">Customer Rating / Rating Pelanggan</p>
-                <strong class="mt-3 block text-4xl">{{ analytics.averageRating || 0 }}/5</strong>
-            </div>
-        </section>
-
-        <section class="rounded-3xl bg-white p-6 dark:bg-slate-900 xl:col-span-12">
-            <div class="flex items-center justify-between">
-                <h3 class="font-serif text-2xl font-bold">Sales Trend / Tren Penjualan</h3>
-                <span class="text-xs uppercase tracking-[0.18em] text-slate-400">7 Days</span>
-            </div>
-            <div class="mt-6 grid gap-3">
-                <div v-for="row in salesByDay" :key="row.day" class="grid gap-2 rounded-2xl bg-slate-50 px-4 py-4 dark:bg-slate-800/70 md:grid-cols-[140px_minmax(0,1fr)_160px] md:items-center">
-                    <span class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ row.day }}</span>
-                    <div class="h-3 rounded-full bg-slate-200 dark:bg-slate-700">
-                        <div class="h-full rounded-full bg-slate-800 dark:bg-slate-200" :style="{ width: `${Math.max(12, Number(row.total) / 1500)}%` }"></div>
+                    <div class="flex gap-2">
+                        <div class="h-3 w-3 rounded-full bg-[#3d2b1f]"></div>
+                        <span class="text-xs font-bold text-[#3d2b1f] dark:text-[#f7f2e8]">Revenue</span>
                     </div>
-                    <strong>Rp {{ Number(row.total).toLocaleString('id-ID') }}</strong>
                 </div>
-            </div>
-        </section>
+                <div class="h-[340px]">
+                    <Chart type="line" :data="salesChartData" :options="salesChartOptions" />
+                </div>
+            </section>
+
+            <!-- Top Menu List -->
+            <section class="rounded-2xl bg-white p-6 shadow-sm lg:col-span-4 dark:bg-[#1d2521]">
+                <h3 class="font-serif text-xl font-bold text-[#3d2b1f] dark:text-[#f7f2e8]">Top Sellers</h3>
+                <p class="mb-6 text-xs text-[#9b8a72]">Menu paling diminati bulan ini</p>
+                
+                <div class="space-y-4">
+                    <div
+                        v-for="(item, index) in topMenus"
+                        :key="item.id"
+                        class="flex items-center gap-4 rounded-xl border border-transparent bg-[#f7f2e8]/50 p-3 transition-all hover:border-[#ece4d9] hover:bg-white dark:bg-[#28322e]"
+                    >
+                        <span class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#3d2b1f] text-sm font-black text-[#f7f2e8]">
+                            {{ index + 1 }}
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate text-sm font-bold text-[#3d2b1f] dark:text-[#f7f2e8]">{{ item.name }}</p>
+                            <p class="text-[11px] text-[#9b8a72]">{{ item.sold_qty }} Porsi terjual</p>
+                        </div>
+                        <div class="h-2 w-12 rounded-full bg-[#ece4d9] overflow-hidden">
+                            <div class="h-full bg-[#3d2b1f]" :style="{ width: `${100 - (index * 15)}%` }"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Forecasts -->
+            <section class="rounded-2xl bg-white p-6 shadow-sm lg:col-span-6 dark:bg-[#1d2521]">
+                <h3 class="font-serif text-xl font-bold text-[#3d2b1f] dark:text-[#f7f2e8]">Stock Forecast / Prediksi</h3>
+                <div class="mt-6 grid gap-4 sm:grid-cols-2">
+                    <article
+                        v-for="prediction in predictions"
+                        :key="prediction.id"
+                        class="rounded-xl border border-[#ece4d9] p-4 transition-colors hover:bg-[#f7f2e8]/30"
+                    >
+                        <div class="flex justify-between">
+                            <strong class="text-sm text-[#3d2b1f] dark:text-[#f7f2e8]">{{ prediction.menu_item?.name }}</strong>
+                            <span class="text-[10px] font-bold text-green-600">+{{ prediction.trend_score }}%</span>
+                        </div>
+                        <div class="mt-3 h-1.5 w-full rounded-full bg-[#ece4d9] overflow-hidden">
+                            <div class="h-full bg-[#3d2b1f]" :style="{ width: `${prediction.trend_score}%` }"></div>
+                        </div>
+                        <p class="mt-3 text-[11px] text-[#9b8a72]">Estimasi kebutuhan: <strong>{{ prediction.predicted_qty }} porsi</strong></p>
+                    </article>
+                </div>
+            </section>
+
+            <!-- Live Status / Bento -->
+            <section class="rounded-2xl bg-white p-6 shadow-sm lg:col-span-6 dark:bg-[#1d2521]">
+                <h3 class="font-serif text-xl font-bold text-[#3d2b1f] dark:text-[#f7f2e8]">Operational Status</h3>
+                <div class="mt-6 grid gap-3 sm:grid-cols-2">
+                    <div
+                        v-for="item in bentoCards"
+                        :key="item.title"
+                        class="flex flex-col justify-between rounded-xl bg-[#f1ece3]/40 p-4 dark:bg-[#28322e]"
+                    >
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-[#9b8a72]">{{ item.title }}</p>
+                        <div class="mt-4 flex items-baseline justify-between">
+                            <strong class="text-xl text-[#3d2b1f] dark:text-[#f7f2e8]">{{ item.value }}</strong>
+                            <span class="material-symbols-outlined text-lg opacity-20">sensors</span>
+                        </div>
+                        <p class="mt-2 text-[11px] text-[#7a6a58]">{{ item.meta }}</p>
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
 </template>
+
+<style scoped>
+/* Custom scrollbar for small areas if needed */
+.overview-page {
+    scrollbar-width: thin;
+    scrollbar-color: #3d2b1f #f7f2e8;
+}
+</style>

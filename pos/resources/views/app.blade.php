@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <link rel="icon" href="/favicon.ico" sizes="any">
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -10,7 +11,7 @@
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700;900&family=Be+Vietnam+Pro:wght@400;500;600;700&family=Material+Symbols+Outlined:wght@100..700" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Material+Symbols+Outlined:wght@100..700" rel="stylesheet" />
         <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
         <script>
             tailwind.config = {
@@ -28,8 +29,8 @@
                             },
                         },
                         fontFamily: {
-                            serif: ['Noto Serif', 'serif'],
-                            sans: ['Be Vietnam Pro', 'sans-serif'],
+                            serif: ['Playfair Display', 'serif'],
+                            sans: ['Plus Jakarta Sans', 'sans-serif'],
                         },
                         boxShadow: {
                             soft: '0 20px 45px rgba(42,31,22,0.10)',
@@ -43,6 +44,12 @@
         <x-inertia::head>
             <title>{{ config('app.name', 'Nineties Coffee POS') }}</title>
         </x-inertia::head>
+
+        @if(config('services.midtrans.is_production'))
+            <script src="https://app.midtrans.com/snap/snap.js" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
+        @else
+            <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
+        @endif
     </head>
     <body>
         <x-inertia::app />

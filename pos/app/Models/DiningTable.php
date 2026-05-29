@@ -10,6 +10,7 @@ class DiningTable extends Model
     protected $fillable = [
         'name',
         'capacity',
+        'floor',
         'coordinate_x',
         'coordinate_y',
         'public_token',
@@ -21,6 +22,7 @@ class DiningTable extends Model
     {
         return [
             'is_active' => 'boolean',
+            'floor' => 'integer',
             'coordinate_x' => 'decimal:2',
             'coordinate_y' => 'decimal:2',
         ];

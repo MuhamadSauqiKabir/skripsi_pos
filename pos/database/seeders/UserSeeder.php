@@ -15,22 +15,33 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         User::query()->updateOrCreate(
-            ['email' => 'admin@pos.com'],
+            ['email' => 'superadmin@nineties.id'],
             [
-                'name' => 'Legacy Admin',
-                'role' => Role::Admin,
-                'phone' => '080000000000',
+                'name' => 'Super Admin Nineties',
+                'role' => Role::SuperAdmin,
+                'phone' => '081234567890',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ],
         );
 
         User::query()->updateOrCreate(
-            ['email' => 'kasir@pos.com'],
+            ['email' => 'admin@nineties.id'],
             [
-                'name' => 'Legacy Kasir',
+                'name' => 'Manager Senopati',
+                'role' => Role::Admin,
+                'phone' => '081290001990',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ],
+        );
+
+        User::query()->updateOrCreate(
+            ['email' => 'employee@nineties.id'],
+            [
+                'name' => 'Staf Barista',
                 'role' => Role::Employee,
-                'phone' => '089999999999',
+                'phone' => '089988887777',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ],

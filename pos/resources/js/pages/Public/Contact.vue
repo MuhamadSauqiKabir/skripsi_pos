@@ -1,11 +1,31 @@
 <script setup lang="ts">
 import PublicLayout from '@/layouts/PublicLayout.vue';
+import { ref } from 'vue';
 
 defineOptions({ layout: PublicLayout });
 
-defineProps<{
+const props = defineProps<{
     contacts: { address: string; phone: string; email: string; hours: string };
 }>();
+
+const form = ref({
+    name: '',
+    phone: '',
+    email: '',
+    message: ''
+});
+
+const sendToWhatsApp = () => {
+    let waNumber = props.contacts.phone.replace(/[^0-9]/g, '');
+    if (waNumber.startsWith('0')) {
+        waNumber = '62' + waNumber.substring(1);
+    }
+    
+    const text = `Halo Nineties Coffee, saya tertarik untuk Reservasi Mood / Bertanya:\n\n*Nama:* ${form.value.name}\n*WA:* ${form.value.phone}\n*Email:* ${form.value.email || '-'}\n\n*Pesan:*\n${form.value.message}`;
+    
+    const url = `https://wa.me/${waNumber}?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+};
 </script>
 
 <template>
@@ -35,15 +55,16 @@ defineProps<{
             </div>
 
             <div class="rounded-3xl border border-brand-gold/10 bg-white p-10 shadow-soft">
-                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">General Inquiry</p>
-                <h2 class="mt-4 font-serif text-4xl font-bold text-brand-espresso">Mari bicara soal kopi, event, atau kolaborasi.</h2>
-                <form class="mt-8 grid gap-5">
-                    <input type="text" placeholder="Nama lengkap" class="rounded-2xl border-brand-gold/20 bg-brand-mist" />
-                    <input type="text" placeholder="Nomor Whatsapp" class="rounded-2xl border-brand-gold/20 bg-brand-mist" />
-                    <input type="email" placeholder="Alamat email" class="rounded-2xl border-brand-gold/20 bg-brand-mist" />
-                    <textarea rows="5" placeholder="Tulis pesan Anda" class="rounded-2xl border-brand-gold/20 bg-brand-mist"></textarea>
-                    <button type="button" class="rounded-2xl bg-brand-gold px-6 py-4 text-sm font-bold uppercase tracking-[0.2em] text-brand-espresso transition hover:brightness-110">
-                        Kirim
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">Reservasi Mood / Inquiry</p>
+                <h2 class="mt-4 font-serif text-4xl font-bold text-brand-espresso">Mari bicara soal meja, event, atau kolaborasi.</h2>
+                <form @submit.prevent="sendToWhatsApp" class="mt-8 grid gap-5">
+                    <input v-model="form.name" required type="text" placeholder="Nama lengkap" class="rounded-2xl border-brand-gold/20 bg-brand-mist focus:border-brand-gold focus:ring-1 focus:ring-brand-gold" />
+                    <input v-model="form.phone" required type="text" placeholder="Nomor Whatsapp" class="rounded-2xl border-brand-gold/20 bg-brand-mist focus:border-brand-gold focus:ring-1 focus:ring-brand-gold" />
+                    <input v-model="form.email" type="email" placeholder="Alamat email (Opsional)" class="rounded-2xl border-brand-gold/20 bg-brand-mist focus:border-brand-gold focus:ring-1 focus:ring-brand-gold" />
+                    <textarea v-model="form.message" required rows="5" placeholder="Detail Reservasi Mood atau pesan Anda..." class="rounded-2xl border-brand-gold/20 bg-brand-mist focus:border-brand-gold focus:ring-1 focus:ring-brand-gold"></textarea>
+                    <button type="submit" class="flex items-center justify-center gap-2 rounded-2xl bg-brand-gold px-6 py-4 text-sm font-bold uppercase tracking-[0.2em] text-brand-espresso transition hover:brightness-110">
+                        Kirim via WhatsApp
+                        <span class="material-symbols-outlined text-sm">open_in_new</span>
                     </button>
                 </form>
             </div>

@@ -45,7 +45,21 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
+            'settings' => \App\Models\Setting::all()->pluck('value', 'key'),
+            'midtrans_client_key' => config('services.midtrans.client_key'),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'activeOrder' => function () use ($request) {
+                $phone = session('customer_phone') ?? $request->cookie('customer_phone');
+                if (! $phone) {
+                    return null;
+                }
+
+                return \App\Models\Order::query()
+                    ->whereHas('customer', fn ($q) => $q->where('phone', $phone))
+                    ->whereNotIn('status', [\App\Enums\OrderStatus::Completed->value, \App\Enums\OrderStatus::Cancelled->value])
+                    ->latest()
+                    ->first();
+            },
         ];
     }
 }

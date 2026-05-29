@@ -29,9 +29,9 @@ class PosSeeder extends Seeder
         );
 
         User::query()->updateOrCreate(
-            ['email' => 'owner@ninetiescoffee.test'],
+            ['email' => 'admin@ninetiescoffee.test'],
             [
-                'name' => 'Nineties Owner',
+                'name' => 'Nineties Admin',
                 'role' => Role::Admin,
                 'phone' => '081111111111',
                 'password' => Hash::make('password'),

@@ -12,32 +12,38 @@ class PublicSiteController extends Controller
 {
     public function home(): Response
     {
+        $settings = \App\Models\Setting::all()->pluck('value', 'key');
         return Inertia::render('Public/Home', $this->sharedProps([
             'featuredMenus' => $this->featuredMenus(),
+            'heroContent' => [
+                'title' => $settings->get('landing_hero_title') ?? 'Crafting the Perfect Cup, Every Time.',
+                'subtitle' => $settings->get('landing_hero_subtitle') ?? 'Rasakan harmoni antara biji kopi pilihan dan suasana estetik yang menyatukan setiap cerita.',
+            ],
         ], 'home'));
     }
 
     public function about(): Response
     {
+        $settings = \App\Models\Setting::all()->pluck('value', 'key');
+
         return Inertia::render('Public/About', $this->sharedProps([
-            'storyTimeline' => [
-                ['year' => '2018', 'title' => 'Awal Perjalanan', 'description' => 'Nineties Coffee lahir sebagai ruang hangat untuk kopi, cerita, dan kreativitas.'],
-                ['year' => '2020', 'title' => 'Refining the Craft', 'description' => 'Kami mematangkan karakter rasa, pelayanan, dan identitas visual yang lebih elegan.'],
-                ['year' => '2026', 'title' => 'Digital Experience', 'description' => 'Kini pengalaman cafe diperluas lewat POS, QR table ordering, dan QRIS realtime.'],
+            'storyTimeline' => $settings->has('about_story_timeline') 
+                ? json_decode($settings->get('about_story_timeline'), true) 
+                : [
+                    ['year' => '2018', 'title' => 'Awal Perjalanan', 'description' => 'Nineties Coffee lahir sebagai ruang hangat untuk kopi, cerita, dan kreativitas.'],
+                    ['year' => '2020', 'title' => 'Refining the Craft', 'description' => 'Kami mematangkan karakter rasa, pelayanan, dan identitas visual yang lebih elegan.'],
+                    ['year' => '2026', 'title' => 'Digital Experience', 'description' => 'Kini pengalaman cafe diperluas lewat POS, QR table ordering, dan QRIS realtime.'],
+                ],
+            'location' => [
+                'address' => $settings->get('shop_address') ?? 'Jl. Senopati No. 90, Jakarta Selatan',
+                'phone'   => $settings->get('shop_phone') ?? '0812-9000-1990',
+                'email'   => $settings->get('shop_email') ?? 'hello@ninetiescoffee.id',
+                'hours'   => $settings->get('shop_hours') ?? 'Setiap Hari 07:00 - 22:00',
             ],
         ], 'about'));
     }
 
-    public function store(): Response
-    {
-        return Inertia::render('Public/Store', $this->sharedProps([
-            'stores' => [
-                ['name' => 'Nineties Senopati', 'hours' => '07:00 - 23:00', 'address' => 'Jl. Senopati No. 90, Jakarta Selatan'],
-                ['name' => 'Nineties Cikajang', 'hours' => '08:00 - 22:00', 'address' => 'Jl. Cikajang No. 14, Jakarta Selatan'],
-                ['name' => 'Nineties Tebet', 'hours' => '07:00 - 22:00', 'address' => 'Jl. Tebet Timur Dalam Raya No. 8, Jakarta Selatan'],
-            ],
-        ], 'store'));
-    }
+
 
     public function menu(): Response
     {
@@ -46,18 +52,20 @@ class PublicSiteController extends Controller
                 ->with(['menuItems' => fn ($query) => $query->where('is_available', true)->orderBy('name')])
                 ->orderBy('sort_order')
                 ->get(),
-            'tables' => DiningTable::query()->where('is_active', true)->orderBy('name')->get(['name', 'public_token']),
+            'tables' => DiningTable::query()->where('is_active', true)->orderBy('name')->get(['name', 'public_token', 'floor']),
         ], 'menu'));
     }
 
     public function contact(): Response
     {
+        $settings = \App\Models\Setting::all()->pluck('value', 'key');
+        
         return Inertia::render('Public/Contact', $this->sharedProps([
             'contacts' => [
-                'address' => 'Jl. Senopati No. 90, Jakarta Selatan',
-                'phone' => '0812-9000-1990',
-                'email' => 'hello@ninetiescoffee.id',
-                'hours' => 'Setiap Hari 07:00 - 22:00',
+                'address' => $settings->get('shop_address') ?? 'Jl. Senopati No. 90, Jakarta Selatan',
+                'phone' => $settings->get('shop_phone') ?? '0812-9000-1990',
+                'email' => $settings->get('shop_email') ?? 'hello@ninetiescoffee.id',
+                'hours' => $settings->get('shop_hours') ?? 'Setiap Hari 07:00 - 22:00',
             ],
         ], 'contact'));
     }
@@ -69,7 +77,6 @@ class PublicSiteController extends Controller
             'publicNav' => [
                 ['label' => 'Beranda', 'href' => route('public.home'), 'key' => 'home'],
                 ['label' => 'About', 'href' => route('public.about'), 'key' => 'about'],
-                ['label' => 'Store', 'href' => route('public.store'), 'key' => 'store'],
                 ['label' => 'Pesan/Menu', 'href' => route('public.menu'), 'key' => 'menu'],
                 ['label' => 'Contacts', 'href' => route('public.contact'), 'key' => 'contact'],
             ],

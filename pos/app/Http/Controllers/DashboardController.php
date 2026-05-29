@@ -15,7 +15,6 @@ use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\WeeklyPrediction;
 use App\Services\PredictiveStockService;
-use App\Services\RajaOngkirService;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -24,7 +23,6 @@ class DashboardController extends Controller
 {
     public function __construct(
         private readonly PredictiveStockService $predictiveStockService,
-        private readonly RajaOngkirService $rajaOngkirService,
     ) {
     }
 
@@ -40,7 +38,7 @@ class DashboardController extends Controller
             'predictions' => $this->predictions(),
             'salesByDay' => $this->salesByDay(),
             'bentoCards' => [
-                ['title' => 'Online Orders / Pesanan Online', 'value' => $this->onlineOrders()->count(), 'meta' => 'Xendit + RajaOngkir ready'],
+                ['title' => 'Online Orders / Pesanan Online', 'value' => $this->onlineOrders()->count(), 'meta' => 'Digital payment ready'],
                 ['title' => 'Low Stock / Stok Menipis', 'value' => Ingredient::query()->whereColumn('stock', '<=', 'par_stock')->count(), 'meta' => 'Ingredient alert'],
                 ['title' => 'Table Efficiency / Efisiensi Meja', 'value' => $this->tableEfficiency()->avg('efficiency'), 'meta' => 'Rata-rata utilisasi'],
                 ['title' => 'CSAT / Kepuasan', 'value' => round((float) CustomerFeedback::query()->avg('rating'), 1), 'meta' => 'Customer satisfaction'],
@@ -56,8 +54,7 @@ class DashboardController extends Controller
                 ->latest('ordered_at')
                 ->paginate(12),
             'onlineOrders' => $this->onlineOrders()->values(),
-            'shippingOptions' => $this->rajaOngkirService->sampleCouriers(),
-            'statusOptions' => collect(OrderStatus::cases())->map(fn (OrderStatus $status) => [
+            'statusOptions' => collect(OrderStatus::cases())->map(fn(OrderStatus $status) => [
                 'value' => $status->value,
                 'label' => $status->label(),
             ]),
@@ -102,31 +99,57 @@ class DashboardController extends Controller
     {
         return Inertia::render('Dashboard/Settings', $this->baseProps([
             'integrations' => [
-                'xendit' => ['label' => 'Xendit / Pembayaran', 'status' => config('services.xendit.secret_key') ? 'Connected' : 'Demo Mode'],
-                'rajaongkir' => ['label' => 'RajaOngkir / Shipping', 'status' => config('services.rajaongkir.api_key') ? 'Connected' : 'Demo Mode'],
+                'midtrans' => ['label' => 'Midtrans / Pembayaran', 'status' => config('services.midtrans.server_key') ? 'Connected' : 'Demo Mode'],
             ],
         ], 'settings'));
+    }
+
+    public function webContent(): Response
+    {
+        return Inertia::render('Dashboard/WebContent', $this->baseProps([
+            'contentSettings' => \App\Models\Setting::query()
+                ->whereIn('key', ['shop_address', 'shop_phone', 'shop_email', 'shop_hours', 'landing_hero_title', 'landing_hero_subtitle', 'about_story_timeline'])
+                ->pluck('value', 'key'),
+        ], 'web-content'));
     }
 
     private function baseProps(array $props, string $currentPage): array
     {
         $this->predictiveStockService->generate();
+        $user = request()->user();
+
+        $nav = [
+            ['label' => 'Dashboard / Dasbor', 'href' => route('dashboard.overview'), 'key' => 'overview'],
+            ['label' => 'Orders / Pesanan', 'href' => route('dashboard.orders'), 'key' => 'orders'],
+            ['label' => 'Inventory / Stok', 'href' => route('dashboard.inventory'), 'key' => 'inventory'],
+        ];
+
+        // Meja & Laporan untuk Admin ke atas
+        if (in_array($user->role, [Role::SuperAdmin, Role::Admin])) {
+            $nav[] = ['label' => 'Tables / Meja', 'href' => route('dashboard.tables'), 'key' => 'tables'];
+            $nav[] = ['label' => 'Reports / Laporan', 'href' => route('dashboard.reports'), 'key' => 'reports'];
+        }
+
+        $sidebarUtilities = [
+            ['label' => 'Profile / Profil', 'href' => route('dashboard.profile'), 'key' => 'profile'],
+        ];
+
+        if (in_array($user->role, [Role::SuperAdmin, Role::Admin])) {
+            $sidebarUtilities[] = ['label' => 'Web Content / Konten', 'href' => route('dashboard.web-content'), 'key' => 'web-content'];
+        }
+
+        // Settings & Staff Management hanya untuk SuperAdmin
+        if ($user->role === Role::SuperAdmin) {
+            $sidebarUtilities[] = ['label' => 'Staff / Pegawai', 'href' => route('dashboard.users'), 'key' => 'users'];
+            $sidebarUtilities[] = ['label' => 'Settings / Pengaturan', 'href' => route('dashboard.settings'), 'key' => 'settings'];
+        }
 
         return array_merge([
             'currentPage' => $currentPage,
             'roleScope' => $this->roleScope(),
             'analytics' => $this->analytics(),
-            'dashboardNav' => [
-                ['label' => 'Dashboard / Dasbor', 'href' => route('dashboard.overview'), 'key' => 'overview'],
-                ['label' => 'Orders / Pesanan', 'href' => route('dashboard.orders'), 'key' => 'orders'],
-                ['label' => 'Inventory / Stok', 'href' => route('dashboard.inventory'), 'key' => 'inventory'],
-                ['label' => 'Tables / Meja', 'href' => route('dashboard.tables'), 'key' => 'tables'],
-                ['label' => 'Reports / Laporan', 'href' => route('dashboard.reports'), 'key' => 'reports'],
-            ],
-            'sidebarUtilities' => [
-                ['label' => 'Profile / Profil', 'href' => route('dashboard.profile'), 'key' => 'profile'],
-                ['label' => 'Settings / Pengaturan', 'href' => route('dashboard.settings'), 'key' => 'settings'],
-            ],
+            'dashboardNav' => $nav,
+            'sidebarUtilities' => $sidebarUtilities,
         ], $props);
     }
 
@@ -176,8 +199,8 @@ class DashboardController extends Controller
     {
         return MenuItem::query()
             ->withCount([
-                'orderItems as sold_qty' => fn ($query) => $query
-                    ->whereHas('order', fn ($orderQuery) => $orderQuery->whereBetween('ordered_at', [now()->subDays(30), now()])),
+                'orderItems as sold_qty' => fn($query) => $query
+                    ->whereHas('order', fn($orderQuery) => $orderQuery->whereBetween('ordered_at', [now()->subDays(30), now()])),
             ])
             ->orderByDesc('sold_qty')
             ->take(6)
@@ -193,10 +216,10 @@ class DashboardController extends Controller
     {
         return DiningTable::query()
             ->withCount([
-                'orders as order_count' => fn ($query) => $query->whereBetween('ordered_at', [now()->subDays(30), now()]),
+                'orders as order_count' => fn($query) => $query->whereBetween('ordered_at', [now()->subDays(30), now()]),
             ])
             ->get()
-            ->map(fn (DiningTable $table) => [
+            ->map(fn(DiningTable $table) => [
                 'name' => $table->name,
                 'capacity' => $table->capacity,
                 'order_count' => $table->order_count,
@@ -232,9 +255,7 @@ class DashboardController extends Controller
                     'customer' => $order->customer?->name ?? 'Guest',
                     'payment_status' => $order->payment_status->value,
                     'total_amount' => $order->total_amount,
-                    'shipping_status' => 'Waiting Courier / Menunggu Kurir',
-                    'shipping_vendor' => 'RajaOngkir',
-                    'payment_vendor' => 'Xendit',
+                    'shipping_status' => 'Self Pickup / Dine-in',
                 ];
             });
     }

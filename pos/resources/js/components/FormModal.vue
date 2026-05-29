@@ -11,15 +11,31 @@ const emit = defineEmits<{
 </script>
 
 <template>
-    <div v-if="open" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4">
-        <div class="w-full max-w-2xl rounded-3xl bg-white p-6 dark:bg-slate-900">
-            <div class="mb-5 flex items-start justify-between gap-4">
+    <div
+        v-if="open"
+        class="inset-0 bg-slate-950/40 px-4 fixed z-50 flex items-center justify-center"
+    >
+        <div
+            class="max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg p-6 w-full bg-[#fffaf2] dark:bg-[#1d2521]"
+        >
+            <div class="mb-5 gap-4 flex items-start justify-between">
                 <div>
                     <h3 class="font-serif text-2xl font-bold">{{ title }}</h3>
-                    <p v-if="subtitle" class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ subtitle }}</p>
+                    <p
+                        v-if="subtitle"
+                        class="mt-1 text-sm text-[#6d6255] dark:text-[#c8bdaa]"
+                    >
+                        {{ subtitle }}
+                    </p>
                 </div>
-                <button type="button" class="rounded-xl bg-slate-100 p-2 dark:bg-slate-800" @click="emit('close')">
-                    <span class="material-symbols-outlined text-base">close</span>
+                <button
+                    type="button"
+                    class="p-2 rounded-full bg-[#f1ece3] text-[#26312d] dark:bg-[#28322e] dark:text-[#f7f1e8]"
+                    @click="emit('close')"
+                >
+                    <span class="material-symbols-outlined text-base"
+                        >close</span
+                    >
                 </button>
             </div>
             <slot />

@@ -13,13 +13,39 @@ const form = useForm({
 <template>
     <Head title="Two Factor Challenge" />
 
-    <form class="panel-card form-grid" @submit.prevent="form.post('/two-factor-challenge')">
-        <div>
-            <p class="eyebrow">2FA Challenge</p>
+    <form
+        class="gap-4 grid"
+        @submit.prevent="form.post('/two-factor-challenge')"
+    >
+        <div class="nineties-auth-heading">
+            <p>2FA Challenge</p>
             <h2>Masukkan kode autentikasi</h2>
         </div>
-        <input v-model="form.code" type="text" placeholder="6 digit code" />
-        <input v-model="form.recovery_code" type="text" placeholder="Recovery code jika diperlukan" />
-        <button class="primary-button" type="submit">Verifikasi</button>
+        <label class="nineties-field">
+            <span>Kode 2FA</span>
+            <input
+                v-model="form.code"
+                class="nineties-input"
+                type="text"
+                inputmode="numeric"
+                placeholder="6 digit code"
+            />
+        </label>
+        <label class="nineties-field">
+            <span>Recovery Code</span>
+            <input
+                v-model="form.recovery_code"
+                class="nineties-input"
+                type="text"
+                placeholder="Recovery code jika diperlukan"
+            />
+        </label>
+        <button
+            class="nineties-auth-submit"
+            type="submit"
+            :disabled="form.processing"
+        >
+            Verifikasi
+        </button>
     </form>
 </template>

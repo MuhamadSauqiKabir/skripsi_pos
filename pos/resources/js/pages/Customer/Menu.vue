@@ -54,7 +54,7 @@ const totalItems = () => cart.value.reduce((sum, item) => sum + item.quantity, 0
             <header class="mb-8 overflow-hidden rounded-2xl border border-brand-gold/10 bg-white p-6 shadow-soft">
                 <div class="flex items-center justify-between gap-4">
                     <div>
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-brand-gold">Ordering from</p>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-brand-gold">Pesan dari meja</p>
                         <h2 class="mt-1 font-serif text-3xl font-bold text-brand-espresso">{{ table.name }}</h2>
                         <p class="mt-1 text-xs text-brand-bronze/70">Silakan pilih menu favorit Anda di bawah ini.</p>
                     </div>
@@ -92,7 +92,7 @@ const totalItems = () => cart.value.reduce((sum, item) => sum + item.quantity, 0
                             
                             <div class="menu-card-footer">
                                 <span class="text-[10px] font-bold uppercase tracking-widest text-brand-gold">
-                                    {{ menu.is_featured ? '★ Recommended' : 'Freshly Served' }}
+                                    {{ menu.is_featured ? 'Rekomendasi' : 'Disajikan Segar' }}
                                 </span>
                                 <div class="qty-box">
                                     <button type="button" @click="reduce(menu.id)" class="active:scale-90">-</button>
@@ -107,7 +107,7 @@ const totalItems = () => cart.value.reduce((sum, item) => sum + item.quantity, 0
         </section>
 
         <aside class="customer-side-card rounded-2xl !p-6 shadow-md">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-brand-gold">Your Order</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-brand-gold">Pesanan Anda</p>
             <h3 class="mt-1 font-serif text-xl font-bold text-brand-espresso">{{ totalItems() }} Item</h3>
             
             <div class="mt-6 space-y-3">
@@ -127,7 +127,7 @@ const totalItems = () => cart.value.reduce((sum, item) => sum + item.quantity, 0
                     <strong class="text-base">Rp {{ Number(cart.reduce((s, i) => s + (i.price * i.quantity), 0)).toLocaleString('id-ID') }}</strong>
                 </div>
                 <Link class="primary-button w-full rounded-xl shadow-md transition-transform active:scale-95 !min-h-[42px] text-sm" :href="`/qr/${table.public_token}/checkout`">
-                    Checkout
+                    Lanjut Bayar
                 </Link>
             </div>
         </aside>
@@ -139,7 +139,7 @@ const totalItems = () => cart.value.reduce((sum, item) => sum + item.quantity, 0
                     <span class="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-xs font-bold">{{ totalItems() }}</span>
                     <span class="text-sm font-bold uppercase tracking-wider">Lihat Keranjang</span>
                 </div>
-                <span class="font-serif text-lg font-bold">Rp {{ Number(cart.reduce((s, i) => s + (i.price * i.quantity), 0)).toLocaleString('id-ID') }} →</span>
+                <span class="font-serif text-lg font-bold">Rp {{ Number(cart.reduce((s, i) => s + (i.price * i.quantity), 0)).toLocaleString('id-ID') }}</span>
             </Link>
         </div>
     </div>

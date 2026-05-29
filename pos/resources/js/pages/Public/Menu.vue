@@ -1,126 +1,203 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import OrderSidebar from '@/components/OrderSidebar.vue';
+import { useLanguage } from '@/composables/useLanguage';
 import PublicLayout from '@/layouts/PublicLayout.vue';
+import { Head } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
 
 defineOptions({ layout: PublicLayout });
 
+type MenuItem = {
+    id: number;
+    name: string;
+    description: string | null;
+    image_url: string | null;
+    price: number | string;
+    prep_time_minutes: number;
+    is_featured: boolean;
+};
+
+type Category = {
+    id: number;
+    name: string;
+    description: string | null;
+    menu_items: MenuItem[];
+};
+
+type DiningTable = {
+    name: string;
+    public_token: string;
+    floor: number;
+};
+
 const props = defineProps<{
-    categories: Array<any>;
-    tables: Array<{ name: string; public_token: string; floor: number }>;
+    categories: Category[];
+    tables: DiningTable[];
 }>();
 
-const activeFloor = ref(1);
+const { language } = useLanguage();
+const selectedMenuId = ref<number | string | null>(null);
 
-const groupedTables = computed(() => {
-    const groups: Record<number, Array<any>> = { 1: [], 2: [], 3: [] };
-    props.tables.forEach((table) => {
-        const floor = table.floor || 1;
-        if (groups[floor]) {
-            groups[floor].push(table);
-        }
-    });
-    return groups;
-});
+const copy = computed(() =>
+    language.value === 'EN'
+        ? {
+              title: 'Order Menu',
+              kicker: 'Order Menu',
+              heading: 'Pick your favorite menu, then order from the table.',
+              intro: 'Choose a menu item, set floor, table, quantity, and payment from the order sidebar.',
+              choose: 'Choose Menu',
+              featured: 'Recommended',
+              served: 'Freshly Served',
+              minute: 'Min',
+          }
+        : {
+              title: 'Pesan Menu',
+              kicker: 'Pesan Menu',
+              heading: 'Pilih menu favorit, lalu pesan langsung dari meja.',
+              intro: 'Pilih menu, atur lantai, nomor meja, jumlah pesanan, dan pembayaran dari sidebar pesanan.',
+              choose: 'Pilih Menu',
+              featured: 'Rekomendasi',
+              served: 'Disajikan Segar',
+              minute: 'Menit',
+          },
+);
+
+const flattenedMenuItems = computed(() =>
+    props.categories.flatMap((category) =>
+        category.menu_items.map((item) => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            category: category.name,
+        })),
+    ),
+);
+
+const translatedText = (value: string | null | undefined) => {
+    if (!value || language.value === 'EN') {
+        return value || '';
+    }
+
+    const map: Record<string, string> = {
+        Snacks: 'Camilan',
+        'Snack and Small Bites': 'Camilan dan kudapan ringan',
+        'Coffee Signature': 'Kopi Andalan',
+        'Non Coffee': 'Non Kopi',
+        'Freshly Served': 'Disajikan Segar',
+        Recommended: 'Rekomendasi',
+    };
+
+    return map[value] ?? value;
+};
+
+const selectMenu = (item: MenuItem) => {
+    selectedMenuId.value = item.id;
+};
 </script>
 
 <template>
-    <section class="mx-auto max-w-7xl px-6 py-20">
-        <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-            <div class="max-w-3xl">
-                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">Pesan / Menu</p>
-                <h1 class="mt-4 font-serif text-5xl font-bold text-brand-espresso">Rasakan menu favorit kami, lalu pesan langsung dari meja.</h1>
-            </div>
-            <div class="rounded-3xl border border-brand-gold/10 bg-white p-5 shadow-soft w-full lg:w-96">
-                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">Quick Order / Pesan Cepat</p>
-                
-                <!-- Floor selector tabs -->
-                <div class="mt-3 flex gap-1 rounded-xl bg-brand-cream/40 p-1">
-                    <button
-                        v-for="floor in [1, 2, 3]"
-                        :key="floor"
-                        type="button"
-                        class="flex-1 rounded-lg py-1.5 text-xs font-bold transition-all"
-                        :class="activeFloor === floor ? 'bg-[#3d2b1f] text-white shadow-sm' : 'text-brand-coffee hover:bg-brand-cream/50'"
-                        @click="activeFloor = floor"
-                    >
-                        Lantai {{ floor }}
-                    </button>
+    <Head :title="copy.title" />
+
+    <section class="mx-auto max-w-[1540px] px-6 py-16 lg:px-10">
+        <div class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_390px]">
+            <main class="min-w-0">
+                <div class="max-w-4xl">
+                    <p class="text-xs font-black uppercase tracking-[0.22em] text-brand-gold">
+                        {{ copy.kicker }}
+                    </p>
+                    <h1 class="mt-5 font-serif text-4xl font-black leading-tight text-brand-espresso md:text-6xl">
+                        {{ copy.heading }}
+                    </h1>
+                    <p class="mt-5 max-w-2xl text-sm leading-7 text-brand-bronze md:text-base">
+                        {{ copy.intro }}
+                    </p>
                 </div>
 
-                <!-- Table selection -->
-                <div class="mt-4">
-                    <div v-if="groupedTables[activeFloor].length > 0" class="flex flex-wrap gap-2 max-h-[140px] overflow-y-auto pr-1">
-                        <a
-                            v-for="table in groupedTables[activeFloor]"
-                            :key="table.public_token"
-                            :href="`/qr/${table.public_token}`"
-                            class="rounded-xl bg-brand-cream px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-brand-coffee transition hover:bg-brand-gold hover:text-white"
-                        >
-                            {{ table.name }}
-                        </a>
-                    </div>
-                    <div v-else class="py-4 text-center text-xs text-brand-bronze/60">
-                        Belum ada meja aktif di Lantai {{ activeFloor }}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="mt-14 grid gap-10">
-            <section v-for="category in categories" :key="category.id">
-                <div class="mb-6 flex items-end justify-between border-b border-brand-gold/20 pb-4">
-                    <div>
-                        <h2 class="font-serif text-3xl font-bold text-brand-espresso">{{ category.name }}</h2>
-                        <p class="mt-2 text-sm text-brand-bronze">{{ category.description }}</p>
-                    </div>
-                </div>
-
-                <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                    <article
-                        v-for="item in category.menu_items"
-                        :key="item.id"
-                        class="client-menu-card group flex flex-col"
-                    >
-                        <div class="relative h-48 overflow-hidden">
-                            <img
-                                v-if="item.image_url"
-                                :src="item.image_url"
-                                :alt="item.name"
-                                class="menu-card-image"
-                                style="height: 100%; width: 100%; object-fit: cover;"
-                            />
-                            <div v-else class="flex h-full w-full items-center justify-center bg-brand-cream/50 text-brand-gold/30">
-                                <span class="material-symbols-outlined text-6xl">image</span>
-                            </div>
-                            
-                            <!-- Price Tag on Image -->
-                            <div class="absolute bottom-4 left-4 rounded-xl bg-white/90 px-3 py-2 text-sm font-bold text-brand-espresso backdrop-blur-sm shadow-sm">
-                                Rp {{ Number(item.price).toLocaleString('id-ID') }}
-                            </div>
-
-                            <!-- Prep Time Tag on Image -->
-                            <div class="absolute right-4 top-4">
-                                <span class="rounded-full bg-[#3d2b1f]/90 px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.18em] text-[#f7f2e8] backdrop-blur-sm">
-                                    {{ item.prep_time_minutes }} Min
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="menu-card-content flex-1 flex flex-col justify-between">
+                <div class="mt-14 grid gap-12">
+                    <section v-for="category in categories" :key="category.id">
+                        <div class="mb-6 flex items-end justify-between border-b border-brand-gold/20 pb-4">
                             <div>
-                                <h4 class="font-serif text-xl font-bold text-brand-espresso">{{ item.name }}</h4>
-                                <p class="mt-2 line-clamp-2 text-xs leading-5 text-brand-bronze/70">{{ item.description }}</p>
-                            </div>
-                            
-                            <div class="menu-card-footer mt-4">
-                                <span class="text-[10px] font-bold uppercase tracking-widest text-brand-gold">
-                                    {{ item.is_featured ? '★ Recommended' : 'Freshly Served' }}
-                                </span>
+                                <h2 class="font-serif text-3xl font-bold text-brand-espresso">
+                                    {{ translatedText(category.name) }}
+                                </h2>
+                                <p class="mt-2 text-sm text-brand-bronze">
+                                    {{ translatedText(category.description) }}
+                                </p>
                             </div>
                         </div>
-                    </article>
+
+                        <div class="grid gap-6 md:grid-cols-2 2xl:grid-cols-3">
+                            <article
+                                v-for="item in category.menu_items"
+                                :key="item.id"
+                                :class="[
+                                    'client-menu-card group flex flex-col',
+                                    String(selectedMenuId) === String(item.id)
+                                        ? 'ring-2 ring-[#c9a84c]'
+                                        : '',
+                                ]"
+                            >
+                                <div class="relative h-48 overflow-hidden">
+                                    <img
+                                        v-if="item.image_url"
+                                        :src="item.image_url"
+                                        :alt="item.name"
+                                        class="menu-card-image h-full w-full object-cover"
+                                    />
+                                    <div
+                                        v-else
+                                        class="flex h-full w-full items-center justify-center bg-brand-cream/50 text-brand-gold/30"
+                                    >
+                                        <span class="material-symbols-outlined text-6xl">image</span>
+                                    </div>
+
+                                    <div class="absolute bottom-4 left-4 rounded-xl bg-white/90 px-3 py-2 text-sm font-bold text-brand-espresso shadow-sm backdrop-blur-sm">
+                                        Rp {{ Number(item.price).toLocaleString('id-ID') }}
+                                    </div>
+
+                                    <div class="absolute right-4 top-4">
+                                        <span class="rounded-full bg-[#3d2b1f]/90 px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.18em] text-[#f7f2e8] backdrop-blur-sm">
+                                            {{ item.prep_time_minutes }} {{ copy.minute }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="menu-card-content flex flex-1 flex-col justify-between">
+                                    <div>
+                                        <h4 class="font-serif text-xl font-bold text-brand-espresso">
+                                            {{ item.name }}
+                                        </h4>
+                                        <p class="mt-2 line-clamp-2 text-xs leading-5 text-brand-bronze/70">
+                                            {{ item.description }}
+                                        </p>
+                                    </div>
+
+                                    <div class="menu-card-footer mt-4 gap-3">
+                                        <span class="text-[10px] font-bold uppercase tracking-widest text-brand-gold">
+                                            {{ item.is_featured ? copy.featured : copy.served }}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            class="rounded-full bg-[#3d2b1f] px-4 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-[#f7f2e8] transition hover:bg-[#1f1a17]"
+                                            @click="selectMenu(item)"
+                                        >
+                                            {{ copy.choose }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    </section>
                 </div>
-            </section>
+            </main>
+
+            <OrderSidebar
+                v-model:selected-menu-id="selectedMenuId"
+                :tables="tables"
+                :menu-items="flattenedMenuItems"
+                :show-online-orders="false"
+                mode="public"
+            />
         </div>
     </section>
 </template>

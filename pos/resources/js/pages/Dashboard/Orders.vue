@@ -10,7 +10,6 @@ defineOptions({ layout: AppLayout });
 
 const props = defineProps<{
     recentOrders: { data: Array<any> };
-    onlineOrders: Array<any>;
     statusOptions: Array<{ value: string; label: string }>;
 }>();
 
@@ -30,6 +29,21 @@ const updateOrderStatus = (id: number, status: string) => {
     );
 };
 
+const statusText = (value: string) => {
+    const map: Record<string, string> = {
+        pending: 'Menunggu',
+        awaiting_payment: 'Menunggu Pembayaran',
+        paid: 'Dibayar',
+        brewing: 'Diracik',
+        ready: 'Siap Diambil',
+        completed: 'Selesai',
+        cancelled: 'Dibatalkan',
+        expired: 'Kadaluarsa',
+    };
+
+    return map[value] ?? value;
+};
+
 const filteredOrders = computed(() => {
     if (!query.value) return props.recentOrders.data;
     const term = query.value.toLowerCase();
@@ -43,7 +57,7 @@ const filteredOrders = computed(() => {
 </script>
 
 <template>
-    <div class="gap-5 xl:grid-cols-[minmax(0,1.25fr)_360px] grid">
+    <div class="space-y-5">
         <section class="rounded-lg p-5 sm:p-6 bg-[#fffaf2] dark:bg-[#1d2521]">
             <div
                 class="gap-4 md:flex-row md:items-end md:justify-between flex flex-col"
@@ -52,10 +66,10 @@ const filteredOrders = computed(() => {
                     <p
                         class="text-xs font-bold tracking-[0.2em] text-[#9b8a72] uppercase"
                     >
-                        Order Desk
+                        Meja Pesanan
                     </p>
                     <h2 class="mt-2 font-serif text-2xl font-bold">
-                        Orders / Pesanan
+                        Pesanan
                     </h2>
                     <p
                         class="mt-2 max-w-2xl text-sm leading-6 text-[#6d6255] dark:text-[#c8bdaa]"
@@ -70,8 +84,8 @@ const filteredOrders = computed(() => {
                     <div class="min-w-0 flex-1">
                         <InputFields
                             v-model="query"
-                            label="Search / Cari"
-                            placeholder="Cari order, customer, table..."
+                            label="Cari"
+                            placeholder="Cari pesanan, pelanggan, meja..."
                         />
                     </div>
                     <button
@@ -82,7 +96,7 @@ const filteredOrders = computed(() => {
                         <span class="material-symbols-outlined text-base"
                             >add</span
                         >
-                        Add
+                        Tambah
                     </button>
                 </div>
             </div>
@@ -93,9 +107,9 @@ const filteredOrders = computed(() => {
                         class="text-xs font-bold tracking-[0.16em] text-[#9b8a72] uppercase"
                     >
                         <tr>
-                            <th class="px-4 py-2">Order</th>
-                            <th class="px-4 py-2">Customer</th>
-                            <th class="px-4 py-2">Table</th>
+                            <th class="px-4 py-2">Pesanan</th>
+                            <th class="px-4 py-2">Pelanggan</th>
+                            <th class="px-4 py-2">Meja</th>
                             <th class="px-4 py-2">Total</th>
                             <th class="px-4 py-2">Status</th>
                         </tr>
@@ -112,12 +126,12 @@ const filteredOrders = computed(() => {
                             <td
                                 class="px-4 py-4 text-[#6d6255] dark:text-[#c8bdaa]"
                             >
-                                {{ order.customer?.name || 'Guest' }}
+                                {{ order.customer?.name || 'Pelanggan' }}
                             </td>
                             <td
                                 class="px-4 py-4 text-[#6d6255] dark:text-[#c8bdaa]"
                             >
-                                {{ order.dining_table?.name || 'Take Away' }}
+                                {{ order.dining_table?.name || 'Tanpa meja' }}
                             </td>
                             <td class="px-4 py-4 font-semibold">
                                 Rp
@@ -146,7 +160,7 @@ const filteredOrders = computed(() => {
                                         "
                                         :value="option.value"
                                     >
-                                        {{ option.label }}
+                                        {{ statusText(option.value) }}
                                     </option>
                                 </select>
                             </td>
@@ -156,74 +170,26 @@ const filteredOrders = computed(() => {
             </div>
         </section>
 
-        <aside id="online-orders" class="gap-5 grid">
-            <section class="rounded-lg p-5 bg-[#fffaf2] dark:bg-[#1d2521]">
-                <div class="gap-4 flex items-center justify-between">
-                    <h3 class="font-serif text-xl font-bold">Online Orders</h3>
-                </div>
-                <div class="mt-5 gap-3 grid">
-                    <article
-                        v-for="order in onlineOrders"
-                        :key="order.id"
-                        class="rounded-lg p-4 bg-[#f1ece3] dark:bg-[#28322e]"
-                    >
-                        <div class="gap-3 flex items-start justify-between">
-                            <div>
-                                <strong class="block">{{
-                                    order.public_id
-                                }}</strong>
-                                <p
-                                    class="mt-1 text-sm text-[#6d6255] dark:text-[#c8bdaa]"
-                                >
-                                    {{ order.customer }}
-                                </p>
-                            </div>
-                            <span
-                                class="px-3 py-1 text-xs font-bold rounded-full bg-[#fffaf2] text-[#6d6255] uppercase dark:bg-[#1d2521] dark:text-[#c8bdaa]"
-                            >
-                                {{ order.payment_status }}
-                            </span>
-                        </div>
-                        <div
-                            class="mt-3 flex items-center justify-between"
-                        >
-                            <strong
-                                >Rp
-                                {{
-                                    Number(order.total_amount).toLocaleString(
-                                        'id-ID',
-                                    )
-                                }}</strong
-                            >
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-[#9b8a72]">{{ order.shipping_status }}</span>
-                        </div>
-                    </article>
-                </div>
-            </section>
-
-
-        </aside>
-
         <FormModal
             :open="modalOpen"
-            title="Add Order / Tambah Pesanan"
-            subtitle="Form order cepat untuk kasir dan barista"
+            title="Tambah Pesanan"
+            subtitle="Form pesanan cepat untuk kasir dan barista"
             @close="modalOpen = false"
         >
             <div class="gap-4 grid">
                 <InputFields
                     v-model="orderForm.customer_name"
-                    label="Customer Name / Nama Pelanggan"
+                    label="Nama Pelanggan"
                     placeholder="Budi"
                 />
                 <InputFields
                     v-model="orderForm.table_name"
-                    label="Table / Meja"
+                    label="Meja"
                     placeholder="A1"
                 />
                 <InputFields
                     v-model="orderForm.total"
-                    label="Total / Total Pembayaran"
+                    label="Total Pembayaran"
                     type="number"
                     placeholder="50000"
                 />
@@ -234,14 +200,14 @@ const filteredOrders = computed(() => {
                     class="px-4 py-3 text-sm font-bold rounded-full bg-[#f1ece3] text-[#3d2b1f] dark:bg-[#28322e] dark:text-[#f7f1e8]"
                     @click="modalOpen = false"
                 >
-                    Cancel / Batal
+                    Batal
                 </button>
                 <button
                     type="button"
                     class="px-4 py-3 text-sm font-bold rounded-full bg-[#3d2b1f] text-[#f7f1e8]"
                     @click="modalOpen = false"
                 >
-                    Save / Simpan
+                    Simpan
                 </button>
             </FormModalActions>
         </FormModal>

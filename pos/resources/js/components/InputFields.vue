@@ -4,6 +4,7 @@ defineProps<{
     label: string;
     placeholder?: string;
     type?: string;
+    error?: string;
 }>();
 
 const emit = defineEmits<{
@@ -29,5 +30,8 @@ const emit = defineEmits<{
                 )
             "
         />
+        <span v-if="error" class="text-xs font-semibold text-red-600">
+            {{ error }}
+        </span>
     </label>
 </template>

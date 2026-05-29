@@ -36,7 +36,7 @@ class OrderingController extends Controller
         return Inertia::render('Customer/Checkout', [
             'table' => $this->table($token),
             'paymentChannels' => [
-                ['value' => PaymentChannel::Qris->value, 'label' => 'E-wallet Midtrans'],
+                ['value' => PaymentChannel::Qris->value, 'label' => 'Dompet digital Midtrans'],
                 ['value' => PaymentChannel::Cash->value, 'label' => 'Bayar di kasir'],
             ],
         ]);

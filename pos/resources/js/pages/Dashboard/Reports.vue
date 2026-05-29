@@ -40,11 +40,11 @@ const updateFilters = () => {
     }, { preserveState: true, preserveScroll: true });
 };
 
-// PrimeVue Chart Data: Revenue Trend
+// Data grafik tren pendapatan
 const lineChartData = computed(() => ({
     labels: (props.analytics?.daily_trends || []).map(d => d.date),
     datasets: [{
-        label: 'Revenue',
+        label: 'Pendapatan',
         data: (props.analytics?.daily_trends || []).map(d => d.amount),
         fill: true,
         borderColor: '#3d2b1f',
@@ -63,7 +63,7 @@ const lineChartOptions = {
     }
 };
 
-// PrimeVue Chart Data: Category Distribution
+// Data grafik distribusi kategori
 const pieChartData = computed(() => ({
     labels: (props.analytics?.category_share || []).map(c => c.name),
     datasets: [{
@@ -91,10 +91,10 @@ const getExportUrl = (type: 'pdf' | 'excel') => {
             <div class="gap-4 md:flex-row md:items-end md:justify-between flex flex-col">
                 <div>
                     <p class="text-xs font-bold tracking-[0.2em] text-[#9b8a72] uppercase">
-                        Business Insight
+                        Wawasan Bisnis
                     </p>
                     <h2 class="mt-2 font-serif text-3xl font-bold">
-                        Reports / Laporan
+                        Laporan
                     </h2>
                     <p class="mt-2 text-sm text-[#6d6255] dark:text-[#c8bdaa]">
                         Pantau performa penjualan dan analisis profitabilitas.
@@ -123,11 +123,11 @@ const getExportUrl = (type: 'pdf' | 'excel') => {
             <!-- Stats Overview -->
             <div class="mt-8 gap-4 sm:grid-cols-2 lg:grid-cols-4 grid">
                 <div class="rounded-lg p-6 bg-[#f1ece3] dark:bg-[#28322e]">
-                    <span class="text-xs font-bold uppercase tracking-widest text-[#9b8a72]">Revenue / Omzet</span>
+                    <span class="text-xs font-bold uppercase tracking-widest text-[#9b8a72]">Omzet</span>
                     <strong class="mt-3 block text-2xl">Rp {{ (analytics?.revenue || 0).toLocaleString('id-ID') }}</strong>
                 </div>
                 <div class="rounded-lg p-6 bg-[#e5eddf] text-[#273528] dark:bg-[#24342b] dark:text-[#edf7e8]">
-                    <span class="text-xs font-bold uppercase tracking-widest text-[#63745d] dark:text-[#c8d9c1]">Gross Profit</span>
+                    <span class="text-xs font-bold uppercase tracking-widest text-[#63745d] dark:text-[#c8d9c1]">Laba Kotor</span>
                     <strong class="mt-3 block text-2xl">Rp {{ (analytics?.gross_profit || 0).toLocaleString('id-ID') }}</strong>
                 </div>
                 <div class="rounded-lg p-6 bg-[#e1e8ef] text-[#25384d] dark:bg-[#223142] dark:text-[#dcecff]">
@@ -144,13 +144,13 @@ const getExportUrl = (type: 'pdf' | 'excel') => {
         <!-- Charts Section -->
         <div class="gap-5 grid lg:grid-cols-12">
             <section class="rounded-lg p-6 bg-[#fffaf2] dark:bg-[#1d2521] lg:col-span-8">
-                <h3 class="font-serif text-xl font-bold mb-6">Daily Revenue Trend</h3>
+                <h3 class="font-serif text-xl font-bold mb-6">Tren Pendapatan Harian</h3>
                 <div class="h-[300px]">
                     <Chart type="line" :data="lineChartData" :options="lineChartOptions" />
                 </div>
             </section>
             <section class="rounded-lg p-6 bg-[#fffaf2] dark:bg-[#1d2521] lg:col-span-4">
-                <h3 class="font-serif text-xl font-bold mb-6">Top Categories</h3>
+                <h3 class="font-serif text-xl font-bold mb-6">Kategori Teratas</h3>
                 <div class="h-[300px] flex items-center justify-center">
                     <Chart type="pie" :data="pieChartData" :options="pieChartOptions" class="w-full" />
                 </div>
@@ -160,12 +160,12 @@ const getExportUrl = (type: 'pdf' | 'excel') => {
         <!-- Predictive Stock -->
         <section class="rounded-lg p-6 bg-[#fffaf2] dark:bg-[#1d2521]">
             <div class="gap-4 flex items-center justify-between mb-6">
-                <h2 class="font-serif text-xl font-bold">Predictive Stock / Prediksi Stok</h2>
-                <span class="px-3 py-1 text-[10px] font-bold rounded-full bg-[#e5eddf] text-[#63745d] uppercase tracking-widest">Forecast</span>
+                <h2 class="font-serif text-xl font-bold">Prediksi Stok</h2>
+                <span class="px-3 py-1 text-[10px] font-bold rounded-full bg-[#e5eddf] text-[#63745d] uppercase tracking-widest">Perkiraan</span>
             </div>
             <div class="grid gap-4 md:grid-cols-3">
                 <article v-for="prediction in predictions" :key="prediction.id" class="rounded-lg p-5 bg-[#f1ece3] dark:bg-[#28322e]">
-                    <p class="text-[10px] font-bold tracking-[0.18em] text-[#9b8a72] uppercase">Trend</p>
+                    <p class="text-[10px] font-bold tracking-[0.18em] text-[#9b8a72] uppercase">Tren</p>
                     <h3 class="mt-2 text-lg font-bold">{{ prediction.menu_item?.name }}</h3>
                     <p class="mt-1 text-sm text-[#6d6255]">Prediksi {{ prediction.predicted_qty }} porsi terjual</p>
                     <div class="mt-4 h-1.5 rounded-full bg-[#ddd3c2]">
@@ -177,7 +177,7 @@ const getExportUrl = (type: 'pdf' | 'excel') => {
 
         <!-- Top Menu Items Table -->
         <section class="rounded-lg p-6 bg-[#fffaf2] dark:bg-[#1d2521]">
-            <h3 class="font-serif text-xl font-bold mb-6">Top Selling Menus / Menu Terpopuler</h3>
+            <h3 class="font-serif text-xl font-bold mb-6">Menu Terpopuler</h3>
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
                     <thead>
@@ -200,7 +200,7 @@ const getExportUrl = (type: 'pdf' | 'excel') => {
 
         <!-- Audit Logs (Admin Only) -->
         <section v-if="roleScope.showAudit && auditLogs" class="rounded-lg p-6 bg-[#fffaf2] dark:bg-[#1d2521]">
-            <h2 class="font-serif text-xl font-bold mb-6">Recent Activity / Audit Log</h2>
+            <h2 class="font-serif text-xl font-bold mb-6">Aktivitas Terbaru</h2>
             <div class="space-y-3">
                 <div v-for="log in auditLogs" :key="log.id" class="p-4 rounded-lg bg-[#f1ece3] dark:bg-[#28322e] flex flex-wrap justify-between items-center gap-3">
                     <div>
@@ -208,7 +208,7 @@ const getExportUrl = (type: 'pdf' | 'excel') => {
                         <span class="text-xs text-[#6d6255]">{{ log.entity_type }} #{{ log.entity_id }}</span>
                     </div>
                     <div class="text-right">
-                        <span class="text-xs font-bold block">{{ log.user?.name || 'System' }}</span>
+                        <span class="text-xs font-bold block">{{ log.user?.name || 'Sistem' }}</span>
                         <span class="text-[10px] text-[#9b8a72]">{{ new Date(log.created_at).toLocaleString() }}</span>
                     </div>
                 </div>

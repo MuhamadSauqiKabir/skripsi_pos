@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useLanguage } from '@/composables/useLanguage';
+import OrderSidebar from '@/components/OrderSidebar.vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed, onMounted, ref } from 'vue';
 
@@ -16,8 +17,14 @@ const page = usePage<{
         activeOrders?: number;
         weeklyRevenue?: number;
     };
+    settings?: Record<string, string | null>;
     dashboardNav?: Array<{ label: string; href: string; key: string }>;
     sidebarUtilities?: Array<{ label: string; href: string; key: string }>;
+    orderSidebar?: {
+        tables: Array<any>;
+        menuItems: Array<any>;
+        onlineOrders: Array<any>;
+    };
 }>();
 
 const { language, labels, setLanguage } = useLanguage();
@@ -30,6 +37,8 @@ const iconMap: Record<string, string> = {
     reports: 'bar_chart',
     profile: 'person',
     settings: 'settings',
+    users: 'groups',
+    'web-content': 'web',
 };
 
 const descriptionMap = {
@@ -39,10 +48,12 @@ const descriptionMap = {
         orders: 'Kelola antrean pesanan toko, online order, dan status pembayaran.',
         inventory:
             'Atur produk, kategori, restock bahan, dan alert stok menipis.',
-        tables: 'Kelola QR meja, kapasitas, dan efisiensi penggunaan area dine-in.',
+        tables: 'Kelola QR meja, kapasitas, dan efisiensi penggunaan area makan di tempat.',
         reports: 'Lihat performa mingguan, prediksi stok, dan audit aktivitas.',
         profile: 'Kelola profil akun pengguna dashboard.',
         settings: 'Konfigurasi integrasi, laporan, pembayaran, dan pengiriman.',
+        users: 'Kelola akun staf, jabatan, dan akses dashboard.',
+        'web-content': 'Kelola konten website publik Nineties Coffee.',
     },
     EN: {
         overview:
@@ -55,6 +66,33 @@ const descriptionMap = {
             'Review weekly performance, stock predictions, and activity audits.',
         profile: 'Manage the current dashboard account profile.',
         settings: 'Configure integrations, reports, payments, and shipping.',
+        users: 'Manage staff accounts, roles, and dashboard access.',
+        'web-content': 'Manage public website content for Nineties Coffee.',
+    },
+};
+
+const navLabelMap = {
+    IND: {
+        overview: 'Dasbor',
+        orders: 'Pesanan',
+        inventory: 'Stok',
+        tables: 'Meja',
+        reports: 'Laporan',
+        profile: 'Profil',
+        settings: 'Pengaturan',
+        users: 'Staf',
+        'web-content': 'Konten Web',
+    },
+    EN: {
+        overview: 'Dashboard',
+        orders: 'Orders',
+        inventory: 'Inventory',
+        tables: 'Tables',
+        reports: 'Reports',
+        profile: 'Profile',
+        settings: 'Settings',
+        users: 'Staff',
+        'web-content': 'Web Content',
     },
 };
 
@@ -72,6 +110,14 @@ const displayLabel = (label?: string) => {
     return language.value === 'EN' ? parts[0] : parts[1] || parts[0];
 };
 
+const navLabel = (item?: { label?: string; key?: string }) => {
+    if (!item) return '';
+
+    const key = item.key as keyof (typeof navLabelMap)['IND'];
+
+    return navLabelMap[language.value][key] || displayLabel(item.label);
+};
+
 const currentNavItem = computed(
     () =>
         page.props.dashboardNav?.find(
@@ -83,8 +129,45 @@ const currentNavItem = computed(
 );
 
 const pageTitle = computed(
-    () => displayLabel(currentNavItem.value?.label) || labels.value.dashboard,
+    () => navLabel(currentNavItem.value) || labels.value.dashboard,
 );
+
+const pageTabs = computed(() => [
+    ...(page.props.dashboardNav ?? []),
+    ...(page.props.sidebarUtilities ?? []),
+]);
+
+const orderSidebar = computed(() => page.props.orderSidebar ?? null);
+
+const mainLabel = computed(() => (language.value === 'EN' ? 'Main' : 'Utama'));
+const accountLabel = computed(() =>
+    language.value === 'EN' ? 'Account' : 'Akun',
+);
+const summaryLabel = computed(() =>
+    language.value === 'EN' ? 'Live Summary' : 'Ringkasan',
+);
+const ordersLabel = computed(() =>
+    language.value === 'EN' ? 'Orders' : 'Pesanan',
+);
+const revenueLabel = computed(() =>
+    language.value === 'EN' ? 'Revenue' : 'Pendapatan',
+);
+const logoutLabel = computed(() =>
+    language.value === 'EN' ? 'Logout' : 'Keluar',
+);
+const profileLabel = computed(() =>
+    language.value === 'EN' ? 'Profile' : 'Profil',
+);
+const settingsLabel = computed(() =>
+    language.value === 'EN' ? 'Settings' : 'Pengaturan',
+);
+const shopTagline = computed(() => {
+    if (language.value === 'IND') {
+        return 'Sistem Kasir';
+    }
+
+    return page.props.settings?.shop_tagline || 'Coffee POS';
+});
 
 const pageDescription = computed(() => {
     const key = (page.props.currentPage ||
@@ -137,7 +220,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <Head title="Dashboard / Dasbor" />
+    <Head :title="pageTitle" />
 
     <div class="dashboard-ui nineties-dashboard">
         <div
@@ -160,13 +243,13 @@ onMounted(() => {
                     </span>
                     <span>
                         <strong class="nineties-sidebar-title block">{{ page.props.settings?.shop_name || 'Nineties' }}</strong>
-                        <small class="nineties-sidebar-subtitle">{{ page.props.settings?.shop_tagline || 'Coffee POS' }}</small>
+                        <small class="nineties-sidebar-subtitle">{{ shopTagline }}</small>
                     </span>
                 </Link>
             </div>
 
             <nav class="nineties-sidebar-nav">
-                <div class="nineties-sidebar-label">Utama</div>
+                <div class="nineties-sidebar-label">{{ mainLabel }}</div>
                 <Link
                     v-for="item in page.props.dashboardNav || []"
                     :key="item.key"
@@ -178,7 +261,7 @@ onMounted(() => {
                     <span class="material-symbols-outlined text-[1.15rem]">{{
                         iconMap[item.key] || 'dashboard'
                     }}</span>
-                    <span>{{ displayLabel(item.label) }}</span>
+                    <span>{{ navLabel(item) }}</span>
                     <span
                         v-if="
                             item.key === 'orders' &&
@@ -194,12 +277,12 @@ onMounted(() => {
                     <p
                         class="font-bold text-[#7a6a58] text-[0.68rem] tracking-[0.2em] uppercase"
                     >
-                        Live
+                        {{ summaryLabel }}
                     </p>
                     <div class="mt-3 gap-3 grid grid-cols-2">
                         <div>
                             <span class="text-xs text-[#9b8a72] block"
-                                >Orders</span
+                                >{{ ordersLabel }}</span
                             >
                             <strong class="mt-1 text-2xl block text-[#3d2b1f]">{{
                                 page.props.analytics?.activeOrders || 0
@@ -207,7 +290,7 @@ onMounted(() => {
                         </div>
                         <div>
                             <span class="text-xs text-[#9b8a72] block"
-                                >Revenue</span
+                                >{{ revenueLabel }}</span
                             >
                             <strong class="mt-1 text-sm block text-[#3d2b1f]">
                                 Rp
@@ -222,7 +305,7 @@ onMounted(() => {
                     </div>
                 </div>
 
-                <div class="nineties-sidebar-label">Akun</div>
+                <div class="nineties-sidebar-label">{{ accountLabel }}</div>
                 <Link
                     v-for="item in page.props.sidebarUtilities || []"
                     :key="item.key"
@@ -234,7 +317,7 @@ onMounted(() => {
                     <span class="material-symbols-outlined text-[1.15rem]">{{
                         iconMap[item.key] || 'settings'
                     }}</span>
-                    <span>{{ displayLabel(item.label) }}</span>
+                    <span>{{ navLabel(item) }}</span>
                 </Link>
             </nav>
 
@@ -264,7 +347,7 @@ onMounted(() => {
                     <span class="material-symbols-outlined text-base"
                         >logout</span
                     >
-                    Logout
+                    {{ logoutLabel }}
                 </button>
             </div>
         </aside>
@@ -367,14 +450,15 @@ onMounted(() => {
                                 @click="selectLanguage('IND')"
                             >
                                 Indonesia
-                                <span v-if="language === 'IND'">✓</span>
+                                <span v-if="language === 'IND'" class="material-symbols-outlined text-base">check</span>
                             </button>
                             <button
                                 type="button"
                                 :class="{ active: language === 'EN' }"
                                 @click="selectLanguage('EN')"
                             >
-                                English <span v-if="language === 'EN'">✓</span>
+                                English
+                                <span v-if="language === 'EN'" class="material-symbols-outlined text-base">check</span>
                             </button>
                         </div>
                     </div>
@@ -418,7 +502,7 @@ onMounted(() => {
                                     class="material-symbols-outlined text-base"
                                     >person</span
                                 >
-                                Profile
+                                {{ profileLabel }}
                             </Link>
                             <Link
                                 href="/dashboard/settings"
@@ -429,7 +513,7 @@ onMounted(() => {
                                     class="material-symbols-outlined text-base"
                                     >settings</span
                                 >
-                                Settings
+                                {{ settingsLabel }}
                             </Link>
                             <button
                                 type="button"
@@ -440,7 +524,7 @@ onMounted(() => {
                                     class="material-symbols-outlined text-base"
                                     >logout</span
                                 >
-                                Logout
+                                {{ logoutLabel }}
                             </button>
                         </div>
                     </div>
@@ -448,6 +532,28 @@ onMounted(() => {
             </header>
 
             <main class="nineties-dashboard-body">
+                <nav
+                    class="mb-5 flex gap-2 overflow-x-auto rounded-[18px] border border-[#eadfca] bg-[#fffaf2] p-2 shadow-sm"
+                    aria-label="Tab dashboard"
+                >
+                    <Link
+                        v-for="item in pageTabs"
+                        :key="item.key"
+                        :href="item.href"
+                        :class="[
+                            'inline-flex min-h-10 shrink-0 items-center gap-2 rounded-[14px] px-4 text-sm font-black transition',
+                            page.props.currentPage === item.key
+                                ? 'bg-[#3d2b1f] text-[#f7f2e8]'
+                                : 'text-[#6b4226] hover:bg-white',
+                        ]"
+                    >
+                        <span class="material-symbols-outlined text-base">
+                            {{ iconMap[item.key] || 'dashboard' }}
+                        </span>
+                        {{ navLabel(item) }}
+                    </Link>
+                </nav>
+
                 <div
                     v-if="page.props.flash.success"
                     class="mb-4 px-4 py-3 text-sm font-semibold rounded-[14px] bg-[#d1fae5] text-[#065f46]"
@@ -461,7 +567,22 @@ onMounted(() => {
                     {{ page.props.flash.error }}
                 </div>
 
-                <slot />
+                <div
+                    v-if="orderSidebar"
+                    class="grid gap-6 2xl:grid-cols-[minmax(0,1fr)_390px]"
+                >
+                    <section class="min-w-0">
+                        <slot />
+                    </section>
+
+                    <OrderSidebar
+                        :tables="orderSidebar.tables"
+                        :menu-items="orderSidebar.menuItems"
+                        :online-orders="orderSidebar.onlineOrders"
+                        mode="dashboard"
+                    />
+                </div>
+                <slot v-else />
             </main>
         </div>
     </div>

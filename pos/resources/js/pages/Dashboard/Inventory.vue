@@ -22,6 +22,7 @@ defineProps<{
 const productModal = ref(false);
 const categoryModal = ref(false);
 const editingMenuId = ref<number | null>(null);
+const editingImageUrl = ref<string | null>(null);
 
 const menuForm = useForm({
     menu_category_id: '',
@@ -46,6 +47,7 @@ const createCategory = () =>
 
 const editMenu = (item: any) => {
     editingMenuId.value = item.id;
+    editingImageUrl.value = item.image_url || null;
     menuForm.menu_category_id = item.menu_category_id;
     menuForm.name = item.name;
     menuForm.description = item.description || '';
@@ -64,6 +66,7 @@ const submitMenu = () => {
                 productModal.value = false;
                 menuForm.reset();
                 editingMenuId.value = null;
+                editingImageUrl.value = null;
             },
         });
     } else {
@@ -72,6 +75,7 @@ const submitMenu = () => {
             onSuccess: () => {
                 productModal.value = false;
                 menuForm.reset();
+                editingImageUrl.value = null;
             },
         });
     }
@@ -85,7 +89,7 @@ const toggleMenu = (id: number) =>
 const adjustInventory = (id: number, type: string) =>
     router.post(
         adjust(id).url,
-        { type, quantity: 10, notes: `Quick ${type}` },
+        { type, quantity: 10, notes: `Penyesuaian ${type}` },
         { preserveScroll: true },
     );
 </script>
@@ -100,10 +104,10 @@ const adjustInventory = (id: number, type: string) =>
                     <p
                         class="text-xs font-bold tracking-[0.2em] text-[#9b8a72] uppercase"
                     >
-                        Menu Catalog
+                        Katalog Menu
                     </p>
                     <h2 class="mt-2 font-serif text-2xl font-bold">
-                        Products / Produk
+                        Produk
                     </h2>
                     <p
                         class="mt-2 text-sm leading-6 text-[#6d6255] dark:text-[#c8bdaa]"
@@ -115,12 +119,12 @@ const adjustInventory = (id: number, type: string) =>
                     <button
                         type="button"
                         class="min-h-11 gap-2 px-4 text-sm font-bold inline-flex items-center rounded-full bg-[#3d2b1f] text-[#f7f1e8]"
-                        @click="() => { editingMenuId = null; menuForm.reset(); productModal = true; }"
+                        @click="() => { editingMenuId = null; editingImageUrl = null; menuForm.reset(); productModal = true; }"
                     >
                         <span class="material-symbols-outlined text-base"
                             >add</span
                         >
-                        Product
+                        Produk
                     </button>
                     <button
                         type="button"
@@ -130,7 +134,7 @@ const adjustInventory = (id: number, type: string) =>
                         <span class="material-symbols-outlined text-base"
                             >category</span
                         >
-                        Category
+                        Kategori
                     </button>
                 </div>
             </div>
@@ -144,7 +148,7 @@ const adjustInventory = (id: number, type: string) =>
                     <div class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-[#fffaf2] dark:bg-[#1d2521] border border-[#d6b35a]/20">
                         <img v-if="item.image_url" :src="item.image_url" class="h-full w-full object-cover" />
                         <div v-else class="flex h-full w-full items-center justify-center text-[10px] font-bold text-[#7a6a58]">
-                            NO IMG
+                            TANPA GAMBAR
                         </div>
                     </div>
                     <div class="min-w-0">
@@ -159,13 +163,13 @@ const adjustInventory = (id: number, type: string) =>
                             class="px-4 py-2 text-xs font-bold rounded-full border border-[#d6b35a] tracking-[0.14em] text-[#3d2b1f] uppercase dark:text-[#f7f1e8] hover:bg-[#d6b35a] hover:text-[#fffaf2] transition-colors"
                             @click="editMenu(item)"
                         >
-                            Edit
+                            Ubah
                         </button>
                         <button
                             class="px-4 py-2 text-xs font-bold rounded-full bg-[#fffaf2] tracking-[0.14em] text-[#3d2b1f] uppercase dark:bg-[#1d2521] dark:text-[#f7f1e8]"
                             @click="toggleMenu(item.id)"
                         >
-                            {{ item.is_available ? 'Disable / Nonaktif' : 'Enable / Aktif' }}
+                            {{ item.is_available ? 'Nonaktifkan' : 'Aktifkan' }}
                         </button>
                     </div>
                 </div>
@@ -178,10 +182,10 @@ const adjustInventory = (id: number, type: string) =>
                     <p
                         class="text-xs font-bold tracking-[0.2em] text-[#9b8a72] uppercase"
                     >
-                        Stock Room
+                        Ruang Stok
                     </p>
                     <h2 class="mt-2 font-serif text-2xl font-bold">
-                        Inventory / Stok
+                        Stok
                     </h2>
                 </div>
                 <span
@@ -211,13 +215,13 @@ const adjustInventory = (id: number, type: string) =>
                             class="px-4 py-2 text-xs font-bold text-[#f7f2e8] rounded-full bg-[#3d2b1f] tracking-[0.14em] uppercase transition-opacity hover:opacity-90"
                             @click="adjustInventory(ingredient.id, 'restock')"
                         >
-                            Restock
+                            Tambah Stok
                         </button>
                         <button
                             class="px-4 py-2 text-xs font-bold text-[#3d2b1f] rounded-full bg-[#f1ece3] border border-[#3d2b1f] tracking-[0.14em] uppercase transition-colors hover:bg-[#3d2b1f] hover:text-[#f7f2e8]"
                             @click="adjustInventory(ingredient.id, 'waste')"
                         >
-                            Waste
+                            Buang
                         </button>
                     </div>
                 </div>
@@ -227,7 +231,7 @@ const adjustInventory = (id: number, type: string) =>
                 class="mt-6 rounded-lg p-5 bg-[#f7f2e8] border border-[#d6b35a]/30 text-[#8a6d3b]"
             >
                 <h3 class="text-xs font-bold tracking-[0.18em] uppercase text-[#7a6a58]">
-                    Low Stock / Stok Menipis
+                    Stok Menipis
                 </h3>
                 <div class="mt-4 gap-2 grid">
                     <div
@@ -244,32 +248,36 @@ const adjustInventory = (id: number, type: string) =>
 
         <FormModal
             :open="productModal"
-            :title="editingMenuId ? 'Edit Product / Ubah Produk' : 'Add Product / Tambah Produk'"
+            :title="editingMenuId ? 'Ubah Produk' : 'Tambah Produk'"
             subtitle="Lengkapi detail menu POS"
             @close="productModal = false"
         >
-            <FormProducts :form="menuForm" :categories="categories" />
+            <FormProducts
+                :form="menuForm"
+                :categories="categories"
+                :existing-image-url="editingImageUrl"
+            />
             <FormModalActions>
                 <button
                     type="button"
                     class="px-4 py-3 text-sm font-bold rounded-full bg-[#f1ece3] text-[#3d2b1f] dark:bg-[#28322e] dark:text-[#f7f1e8]"
                     @click="productModal = false"
                 >
-                    Cancel
+                    Batal
                 </button>
                 <button
                     type="button"
                     class="px-4 py-3 text-sm font-bold rounded-full bg-[#3d2b1f] text-[#f7f1e8]"
                     @click="submitMenu"
                 >
-                    Save
+                    Simpan
                 </button>
             </FormModalActions>
         </FormModal>
 
         <FormModal
             :open="categoryModal"
-            title="Add Category / Tambah Kategori"
+            title="Tambah Kategori"
             subtitle="Kelompokkan menu agar mudah dicari"
             @close="categoryModal = false"
         >
@@ -280,14 +288,14 @@ const adjustInventory = (id: number, type: string) =>
                     class="px-4 py-3 text-sm font-bold rounded-full bg-[#f1ece3] text-[#3d2b1f] dark:bg-[#28322e] dark:text-[#f7f1e8]"
                     @click="categoryModal = false"
                 >
-                    Cancel
+                    Batal
                 </button>
                 <button
                     type="button"
                     class="px-4 py-3 text-sm font-bold rounded-full bg-[#3d2b1f] text-[#f7f1e8]"
                     @click="createCategory"
                 >
-                    Save
+                    Simpan
                 </button>
             </FormModalActions>
         </FormModal>

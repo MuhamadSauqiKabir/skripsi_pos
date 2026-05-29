@@ -38,10 +38,10 @@ class DashboardController extends Controller
             'predictions' => $this->predictions(),
             'salesByDay' => $this->salesByDay(),
             'bentoCards' => [
-                ['title' => 'Online Orders / Pesanan Online', 'value' => $this->onlineOrders()->count(), 'meta' => 'Digital payment ready'],
-                ['title' => 'Low Stock / Stok Menipis', 'value' => Ingredient::query()->whereColumn('stock', '<=', 'par_stock')->count(), 'meta' => 'Ingredient alert'],
-                ['title' => 'Table Efficiency / Efisiensi Meja', 'value' => $this->tableEfficiency()->avg('efficiency'), 'meta' => 'Rata-rata utilisasi'],
-                ['title' => 'CSAT / Kepuasan', 'value' => round((float) CustomerFeedback::query()->avg('rating'), 1), 'meta' => 'Customer satisfaction'],
+                ['key' => 'online_orders', 'value' => $this->onlineOrders()->count()],
+                ['key' => 'low_stock', 'value' => Ingredient::query()->whereColumn('stock', '<=', 'par_stock')->count()],
+                ['key' => 'table_efficiency', 'value' => $this->tableEfficiency()->avg('efficiency')],
+                ['key' => 'satisfaction', 'value' => round((float) CustomerFeedback::query()->avg('rating'), 1)],
             ],
         ], 'overview'));
     }
@@ -99,7 +99,7 @@ class DashboardController extends Controller
     {
         return Inertia::render('Dashboard/Settings', $this->baseProps([
             'integrations' => [
-                'midtrans' => ['label' => 'Midtrans / Pembayaran', 'status' => config('services.midtrans.server_key') ? 'Connected' : 'Demo Mode'],
+                'midtrans' => ['label' => 'Pembayaran Midtrans', 'status' => config('services.midtrans.server_key') ? 'Terhubung' : 'Mode Demo'],
             ],
         ], 'settings'));
     }
@@ -119,29 +119,29 @@ class DashboardController extends Controller
         $user = request()->user();
 
         $nav = [
-            ['label' => 'Dashboard / Dasbor', 'href' => route('dashboard.overview'), 'key' => 'overview'],
-            ['label' => 'Orders / Pesanan', 'href' => route('dashboard.orders'), 'key' => 'orders'],
-            ['label' => 'Inventory / Stok', 'href' => route('dashboard.inventory'), 'key' => 'inventory'],
+            ['label' => 'Dasbor', 'href' => route('dashboard.overview'), 'key' => 'overview'],
+            ['label' => 'Pesanan', 'href' => route('dashboard.orders'), 'key' => 'orders'],
+            ['label' => 'Stok', 'href' => route('dashboard.inventory'), 'key' => 'inventory'],
         ];
 
         // Meja & Laporan untuk Admin ke atas
         if (in_array($user->role, [Role::SuperAdmin, Role::Admin])) {
-            $nav[] = ['label' => 'Tables / Meja', 'href' => route('dashboard.tables'), 'key' => 'tables'];
-            $nav[] = ['label' => 'Reports / Laporan', 'href' => route('dashboard.reports'), 'key' => 'reports'];
+            $nav[] = ['label' => 'Meja', 'href' => route('dashboard.tables'), 'key' => 'tables'];
+            $nav[] = ['label' => 'Laporan', 'href' => route('dashboard.reports'), 'key' => 'reports'];
         }
 
         $sidebarUtilities = [
-            ['label' => 'Profile / Profil', 'href' => route('dashboard.profile'), 'key' => 'profile'],
+            ['label' => 'Profil', 'href' => route('dashboard.profile'), 'key' => 'profile'],
         ];
 
         if (in_array($user->role, [Role::SuperAdmin, Role::Admin])) {
-            $sidebarUtilities[] = ['label' => 'Web Content / Konten', 'href' => route('dashboard.web-content'), 'key' => 'web-content'];
+            $sidebarUtilities[] = ['label' => 'Konten Web', 'href' => route('dashboard.web-content'), 'key' => 'web-content'];
         }
 
         // Settings & Staff Management hanya untuk SuperAdmin
         if ($user->role === Role::SuperAdmin) {
-            $sidebarUtilities[] = ['label' => 'Staff / Pegawai', 'href' => route('dashboard.users'), 'key' => 'users'];
-            $sidebarUtilities[] = ['label' => 'Settings / Pengaturan', 'href' => route('dashboard.settings'), 'key' => 'settings'];
+            $sidebarUtilities[] = ['label' => 'Staf', 'href' => route('dashboard.users'), 'key' => 'users'];
+            $sidebarUtilities[] = ['label' => 'Pengaturan', 'href' => route('dashboard.settings'), 'key' => 'settings'];
         }
 
         return array_merge([
@@ -150,7 +150,24 @@ class DashboardController extends Controller
             'analytics' => $this->analytics(),
             'dashboardNav' => $nav,
             'sidebarUtilities' => $sidebarUtilities,
+            'orderSidebar' => $this->orderSidebar(),
         ], $props);
+    }
+
+    private function orderSidebar(): array
+    {
+        return [
+            'tables' => DiningTable::query()
+                ->where('is_active', true)
+                ->orderBy('floor')
+                ->orderBy('name')
+                ->get(['id', 'name', 'public_token', 'floor', 'capacity']),
+            'menuItems' => MenuItem::query()
+                ->where('is_available', true)
+                ->orderBy('name')
+                ->get(['id', 'name', 'price']),
+            'onlineOrders' => $this->onlineOrders()->values(),
+        ];
     }
 
     private function weeklyReport(): array
@@ -243,7 +260,7 @@ class DashboardController extends Controller
     private function onlineOrders()
     {
         return Order::query()
-            ->with('customer', 'payments')
+            ->with('customer', 'payments', 'diningTable', 'items')
             ->where('payment_channel', PaymentChannel::Qris->value)
             ->latest('ordered_at')
             ->take(8)
@@ -252,10 +269,13 @@ class DashboardController extends Controller
                 return [
                     'id' => $order->id,
                     'public_id' => $order->public_id,
-                    'customer' => $order->customer?->name ?? 'Guest',
+                    'customer' => $order->customer?->name ?? 'Pelanggan',
                     'payment_status' => $order->payment_status->value,
                     'total_amount' => $order->total_amount,
-                    'shipping_status' => 'Self Pickup / Dine-in',
+                    'service_type' => 'dine_in',
+                    'table_name' => $order->diningTable?->name ?? 'Tanpa meja',
+                    'floor' => $order->diningTable?->floor,
+                    'quantity' => $order->items->sum('quantity'),
                 ];
             });
     }

@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import { useLanguage } from '@/composables/useLanguage';
+import { usePage } from '@inertiajs/vue3';
 import Chart from 'primevue/chart';
 import { computed } from 'vue';
 
@@ -37,8 +39,65 @@ const props = defineProps<{
     topMenus: TopMenu[];
     predictions: Prediction[];
     salesByDay: SalesByDay[];
-    bentoCards: Array<{ title: string; value: number | string; meta: string }>;
+    bentoCards: Array<{ key: string; value: number | string }>;
 }>();
+
+const { language } = useLanguage();
+const page = usePage<{ settings?: Record<string, string | null> }>();
+
+const copy = computed(() =>
+    language.value === 'EN'
+        ? {
+              online: 'System Online',
+              title: 'Performance Center',
+              intro: 'Monitor operational metrics, sales trends, and stock efficiency from one clean dashboard.',
+              activeOrders: 'Active Orders',
+              revenue: 'Revenue',
+              grossProfit: 'Gross Profit',
+              orders: 'Orders',
+              satisfaction: 'Satisfaction',
+              thisWeek: 'This week',
+              grossMeta: 'Gross margin',
+              activeMeta: 'Active queue',
+              satisfactionMeta: 'Customer rating',
+              stable: 'Stable',
+              excellent: 'Excellent',
+              salesTrend: 'Sales Trend',
+              salesTrendMeta: 'Revenue analysis from the last 7 days',
+              topSellers: 'Top Sellers',
+              topSellersMeta: 'Most popular menu this month',
+              soldPortion: 'portions sold',
+              stockForecast: 'Stock Forecast',
+              estimatedNeed: 'Estimated need',
+              portions: 'portions',
+              operationalStatus: 'Operational Status',
+          }
+        : {
+              online: 'Sistem Aktif',
+              title: 'Pusat Performa',
+              intro: 'Pantau metrik operasional, tren penjualan, dan efisiensi stok dari satu dashboard yang rapi.',
+              activeOrders: 'Pesanan Aktif',
+              revenue: 'Pendapatan',
+              grossProfit: 'Laba Kotor',
+              orders: 'Pesanan',
+              satisfaction: 'Kepuasan',
+              thisWeek: 'Minggu ini',
+              grossMeta: 'Margin kotor',
+              activeMeta: 'Antrean aktif',
+              satisfactionMeta: 'Rating pelanggan',
+              stable: 'Stabil',
+              excellent: 'Baik',
+              salesTrend: 'Tren Penjualan',
+              salesTrendMeta: 'Analisis pendapatan 7 hari terakhir',
+              topSellers: 'Menu Terlaris',
+              topSellersMeta: 'Menu paling diminati bulan ini',
+              soldPortion: 'porsi terjual',
+              stockForecast: 'Prediksi Stok',
+              estimatedNeed: 'Estimasi kebutuhan',
+              portions: 'porsi',
+              operationalStatus: 'Status Operasional',
+          },
+);
 
 const formatCurrency = (value: number | string | null | undefined) =>
     `Rp ${Number(value || 0).toLocaleString('id-ID')}`;
@@ -60,32 +119,32 @@ const formatDay = (value: string) => {
 
 const metricCards = computed(() => [
     {
-        title: 'Revenue',
+        title: copy.value.revenue,
         value: formatCurrency(props.analytics.weeklyRevenue),
-        meta: 'Minggu ini',
+        meta: copy.value.thisWeek,
         icon: 'payments',
         trend: '+12.5%',
     },
     {
-        title: 'Gross Profit',
+        title: copy.value.grossProfit,
         value: formatCurrency(props.analytics.grossProfit),
-        meta: 'Laba kotor',
+        meta: copy.value.grossMeta,
         icon: 'account_balance_wallet',
         trend: '+8.2%',
     },
     {
-        title: 'Orders',
+        title: copy.value.orders,
         value: props.analytics.activeOrders || 0,
-        meta: 'Pesanan aktif',
+        meta: copy.value.activeMeta,
         icon: 'shopping_bag',
-        trend: 'Stable',
+        trend: copy.value.stable,
     },
     {
-        title: 'CSAT',
+        title: copy.value.satisfaction,
         value: `${props.analytics.averageRating || 0}/5.0`,
-        meta: 'Kepuasan',
+        meta: copy.value.satisfactionMeta,
         icon: 'stars',
-        trend: 'Perfect',
+        trend: copy.value.excellent,
     },
 ]);
 
@@ -93,7 +152,7 @@ const salesChartData = computed(() => ({
     labels: props.salesByDay.map((row) => formatDay(row.day)),
     datasets: [
         {
-            label: 'Revenue',
+            label: copy.value.revenue,
             data: props.salesByDay.map((row) => Number(row.total || 0)),
             fill: true,
             borderColor: '#3d2b1f',
@@ -105,6 +164,32 @@ const salesChartData = computed(() => ({
         },
     ],
 }));
+
+const statusCardText = computed(() => ({
+    online_orders:
+        language.value === 'EN'
+            ? ['Online Orders', 'Digital payment is ready']
+            : ['Pesanan Online', 'Pembayaran digital siap diproses'],
+    low_stock:
+        language.value === 'EN'
+            ? ['Low Stock', 'Ingredient needs attention']
+            : ['Stok Menipis', 'Bahan perlu diperhatikan'],
+    table_efficiency:
+        language.value === 'EN'
+            ? ['Table Efficiency', 'Average table usage']
+            : ['Efisiensi Meja', 'Rata-rata penggunaan meja'],
+    satisfaction:
+        language.value === 'EN'
+            ? ['Satisfaction', 'Customer rating']
+            : ['Kepuasan', 'Rating pelanggan'],
+}));
+
+const statusCardLabel = (key: string, index: 0 | 1) =>
+    (statusCardText.value as Record<string, string[]>)[key]?.[index] ?? '';
+
+const shopName = computed(
+    () => page.props.settings?.shop_name || 'Nineties Coffee',
+);
 
 const salesChartOptions = computed(() => ({
     responsive: true,
@@ -151,18 +236,18 @@ const salesChartOptions = computed(() => ({
                             <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
                             <span class="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
                         </span>
-                        System Online
+                        {{ copy.online }}
                     </div>
                     <h1 class="font-serif text-3xl font-bold tracking-tight md:text-4xl">
-                        {{ $page.props.settings?.shop_name || 'Nineties Coffee' }} Performance Hub
+                        {{ shopName }} {{ copy.title }}
                     </h1>
                     <p class="max-w-xl text-sm leading-relaxed text-[#f7f2e8]/70">
-                        Pantau metrik operasional, tren penjualan, dan efisiensi stok secara real-time dari satu pusat kendali profesional.
+                        {{ copy.intro }}
                     </p>
                 </div>
                 <div class="flex items-center gap-4 border-l border-white/10 pl-6">
                     <div class="text-right">
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-white/40">Active Orders</p>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-white/40">{{ copy.activeOrders }}</p>
                         <p class="text-3xl font-black">{{ analytics.activeOrders }}</p>
                     </div>
                     <span class="material-symbols-outlined text-4xl text-white/20">monitoring</span>
@@ -210,12 +295,12 @@ const salesChartOptions = computed(() => ({
             <section class="rounded-2xl bg-white p-6 shadow-sm lg:col-span-8 dark:bg-[#1d2521]">
                 <div class="mb-8 flex items-center justify-between">
                     <div>
-                        <h3 class="font-serif text-xl font-bold text-[#3d2b1f] dark:text-[#f7f2e8]">Sales Trend / Tren Penjualan</h3>
-                        <p class="text-xs text-[#9b8a72]">Analisis pendapatan 7 hari terakhir</p>
+                        <h3 class="font-serif text-xl font-bold text-[#3d2b1f] dark:text-[#f7f2e8]">{{ copy.salesTrend }}</h3>
+                        <p class="text-xs text-[#9b8a72]">{{ copy.salesTrendMeta }}</p>
                     </div>
                     <div class="flex gap-2">
                         <div class="h-3 w-3 rounded-full bg-[#3d2b1f]"></div>
-                        <span class="text-xs font-bold text-[#3d2b1f] dark:text-[#f7f2e8]">Revenue</span>
+                        <span class="text-xs font-bold text-[#3d2b1f] dark:text-[#f7f2e8]">{{ copy.revenue }}</span>
                     </div>
                 </div>
                 <div class="h-[340px]">
@@ -225,8 +310,8 @@ const salesChartOptions = computed(() => ({
 
             <!-- Top Menu List -->
             <section class="rounded-2xl bg-white p-6 shadow-sm lg:col-span-4 dark:bg-[#1d2521]">
-                <h3 class="font-serif text-xl font-bold text-[#3d2b1f] dark:text-[#f7f2e8]">Top Sellers</h3>
-                <p class="mb-6 text-xs text-[#9b8a72]">Menu paling diminati bulan ini</p>
+                <h3 class="font-serif text-xl font-bold text-[#3d2b1f] dark:text-[#f7f2e8]">{{ copy.topSellers }}</h3>
+                <p class="mb-6 text-xs text-[#9b8a72]">{{ copy.topSellersMeta }}</p>
                 
                 <div class="space-y-4">
                     <div
@@ -239,7 +324,7 @@ const salesChartOptions = computed(() => ({
                         </span>
                         <div class="min-w-0 flex-1">
                             <p class="truncate text-sm font-bold text-[#3d2b1f] dark:text-[#f7f2e8]">{{ item.name }}</p>
-                            <p class="text-[11px] text-[#9b8a72]">{{ item.sold_qty }} Porsi terjual</p>
+                            <p class="text-[11px] text-[#9b8a72]">{{ item.sold_qty }} {{ copy.soldPortion }}</p>
                         </div>
                         <div class="h-2 w-12 rounded-full bg-[#ece4d9] overflow-hidden">
                             <div class="h-full bg-[#3d2b1f]" :style="{ width: `${100 - (index * 15)}%` }"></div>
@@ -250,7 +335,7 @@ const salesChartOptions = computed(() => ({
 
             <!-- Forecasts -->
             <section class="rounded-2xl bg-white p-6 shadow-sm lg:col-span-6 dark:bg-[#1d2521]">
-                <h3 class="font-serif text-xl font-bold text-[#3d2b1f] dark:text-[#f7f2e8]">Stock Forecast / Prediksi</h3>
+                <h3 class="font-serif text-xl font-bold text-[#3d2b1f] dark:text-[#f7f2e8]">{{ copy.stockForecast }}</h3>
                 <div class="mt-6 grid gap-4 sm:grid-cols-2">
                     <article
                         v-for="prediction in predictions"
@@ -264,26 +349,26 @@ const salesChartOptions = computed(() => ({
                         <div class="mt-3 h-1.5 w-full rounded-full bg-[#ece4d9] overflow-hidden">
                             <div class="h-full bg-[#3d2b1f]" :style="{ width: `${prediction.trend_score}%` }"></div>
                         </div>
-                        <p class="mt-3 text-[11px] text-[#9b8a72]">Estimasi kebutuhan: <strong>{{ prediction.predicted_qty }} porsi</strong></p>
+                        <p class="mt-3 text-[11px] text-[#9b8a72]">{{ copy.estimatedNeed }}: <strong>{{ prediction.predicted_qty }} {{ copy.portions }}</strong></p>
                     </article>
                 </div>
             </section>
 
             <!-- Live Status / Bento -->
             <section class="rounded-2xl bg-white p-6 shadow-sm lg:col-span-6 dark:bg-[#1d2521]">
-                <h3 class="font-serif text-xl font-bold text-[#3d2b1f] dark:text-[#f7f2e8]">Operational Status</h3>
+                <h3 class="font-serif text-xl font-bold text-[#3d2b1f] dark:text-[#f7f2e8]">{{ copy.operationalStatus }}</h3>
                 <div class="mt-6 grid gap-3 sm:grid-cols-2">
                     <div
                         v-for="item in bentoCards"
-                        :key="item.title"
+                        :key="item.key"
                         class="flex flex-col justify-between rounded-xl bg-[#f1ece3]/40 p-4 dark:bg-[#28322e]"
                     >
-                        <p class="text-[10px] font-bold uppercase tracking-wider text-[#9b8a72]">{{ item.title }}</p>
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-[#9b8a72]">{{ statusCardLabel(item.key, 0) || item.key }}</p>
                         <div class="mt-4 flex items-baseline justify-between">
                             <strong class="text-xl text-[#3d2b1f] dark:text-[#f7f2e8]">{{ item.value }}</strong>
                             <span class="material-symbols-outlined text-lg opacity-20">sensors</span>
                         </div>
-                        <p class="mt-2 text-[11px] text-[#7a6a58]">{{ item.meta }}</p>
+                        <p class="mt-2 text-[11px] text-[#7a6a58]">{{ statusCardLabel(item.key, 1) }}</p>
                     </div>
                 </div>
             </section>

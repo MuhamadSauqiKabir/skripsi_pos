@@ -36,7 +36,7 @@
 <body>
     <div class="header">
         <h1>Nineties Coffee</h1>
-        <p>Official Sales Documentation</p>
+        <p>Dokumentasi Penjualan Resmi</p>
         <div class="meta">
             Periode: {{ $date_range }}<br>
             Dicetak: {{ now()->format('d M Y, H:i') }}
@@ -44,48 +44,53 @@
     </div>
 
     <div class="container">
-        <div class="section-title">Performance Summary</div>
+        <div class="section-title">Ringkasan Performa</div>
         <table class="stats-grid">
             <tr>
                 <td class="stats-card" width="33%">
-                    <span class="stats-label">Total Volume</span>
+                    <span class="stats-label">Total Transaksi</span>
                     <span class="stats-value">{{ $orders_count }} Transaksi</span>
                 </td>
                 <td class="stats-card" width="33%">
-                    <span class="stats-label">Total Revenue</span>
+                    <span class="stats-label">Total Pendapatan</span>
                     <span class="stats-value">Rp {{ number_format($revenue, 0, ',', '.') }}</span>
                 </td>
                 <td class="stats-card" width="33%">
-                    <span class="stats-label">Gross Profit</span>
+                    <span class="stats-label">Laba Kotor</span>
                     <span class="stats-value">Rp {{ number_format($profit, 0, ',', '.') }}</span>
                 </td>
             </tr>
         </table>
 
-        <div class="section-title">Transaction Details</div>
+        <div class="section-title">Detail Transaksi</div>
         <table>
             <thead>
                 <tr>
-                    <th width="12%">Order ID</th>
-                    <th width="20%">Date & Time</th>
-                    <th>Customer / Table</th>
-                    <th width="18%">Amount</th>
+                    <th width="12%">ID Pesanan</th>
+                    <th width="20%">Tanggal & Waktu</th>
+                    <th>Pelanggan dan Meja</th>
+                    <th width="18%">Jumlah</th>
                     <th width="15%">Status</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($orders as $order)
+                @php
+                    $orderStatus = $order->status instanceof \App\Enums\OrderStatus
+                        ? $order->status
+                        : \App\Enums\OrderStatus::tryFrom((string) $order->status);
+                @endphp
                 <tr>
                     <td style="font-weight: bold; color: #9b8a72;">#{{ $order->public_id }}</td>
                     <td>{{ $order->ordered_at->format('d M Y') }}<br><small style="color: #9b8a72;">{{ $order->ordered_at->format('H:i') }}</small></td>
                     <td>
-                        <strong>{{ $order->customer?->name ?? 'Guest Customer' }}</strong><br>
-                        <small>Table: {{ $order->diningTable?->name ?? 'N/A' }}</small>
+                        <strong>{{ $order->customer?->name ?? 'Pelanggan' }}</strong><br>
+                        <small>Meja: {{ $order->diningTable?->name ?? 'Tidak ada' }}</small>
                     </td>
                     <td style="font-weight: bold;">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</td>
                     <td>
-                        <span class="status-badge {{ $order->status === 'completed' ? 'status-completed' : 'status-pending' }}">
-                            {{ $order->status }}
+                        <span class="status-badge {{ $orderStatus === \App\Enums\OrderStatus::Completed ? 'status-completed' : 'status-pending' }}">
+                            {{ $orderStatus?->label() ?? $order->status }}
                         </span>
                     </td>
                 </tr>
@@ -94,7 +99,7 @@
         </table>
 
         <div class="footer">
-            Confidential Document &copy; {{ date('Y') }} Nineties Coffee Management. Page <span class="page-number"></span>
+            Dokumen internal &copy; {{ date('Y') }} Manajemen Nineties Coffee. Halaman <span class="page-number"></span>
         </div>
     </div>
 </body>

@@ -1,7 +1,7 @@
 NINETIES COFFEE
-Order: {{ $order->public_id }}
-Table: {{ $order->diningTable?->name ?? 'Take Away' }}
-Customer: {{ $order->customer?->name ?? 'Guest' }}
+Pesanan: {{ $order->public_id }}
+Meja: {{ $order->diningTable?->name ?? 'Bawa pulang' }}
+Pelanggan: {{ $order->customer?->name ?? 'Pelanggan' }}
 @foreach ($order->items as $item)
 {{ $item->menu_name_snapshot }} x{{ $item->quantity }} - Rp {{ number_format((float) $item->line_total, 0, ',', '.') }}
 @endforeach

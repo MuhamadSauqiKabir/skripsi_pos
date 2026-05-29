@@ -11,8 +11,8 @@ const currentSettings = page.props.contentSettings || {};
 
 let defaultTimeline = [
     { year: '2018', title: 'Awal Perjalanan', description: 'Nineties Coffee lahir sebagai ruang hangat untuk kopi, cerita, dan kreativitas.' },
-    { year: '2020', title: 'Refining the Craft', description: 'Kami mematangkan karakter rasa, pelayanan, dan identitas visual yang lebih elegan.' },
-    { year: '2026', title: 'Digital Experience', description: 'Kini pengalaman cafe diperluas lewat POS, QR table ordering, dan QRIS realtime.' },
+    { year: '2020', title: 'Mematangkan Rasa', description: 'Kami mematangkan karakter rasa, pelayanan, dan identitas visual yang lebih elegan.' },
+    { year: '2026', title: 'Pengalaman Digital', description: 'Kini pengalaman kafe diperluas lewat POS, pesan QR meja, dan QRIS realtime.' },
 ];
 
 let parsedTimeline = defaultTimeline;
@@ -26,7 +26,7 @@ if (currentSettings.about_story_timeline) {
 
 const form = useForm({
     settings: [
-        { key: 'landing_hero_title', value: currentSettings.landing_hero_title || 'Crafting the Perfect Cup, Every Time.' },
+        { key: 'landing_hero_title', value: currentSettings.landing_hero_title || 'Racikan Kopi Hangat untuk Setiap Cerita.' },
         { key: 'landing_hero_subtitle', value: currentSettings.landing_hero_subtitle || 'Rasakan harmoni antara biji kopi pilihan dan suasana estetik yang menyatukan setiap cerita.' },
         { key: 'shop_address', value: currentSettings.shop_address || 'Jl. Senopati No. 90, Jakarta Selatan' },
         { key: 'shop_phone', value: currentSettings.shop_phone || '0812-9000-1990' },
@@ -56,7 +56,7 @@ const removeTimeline = (index: number) => {
         <section class="rounded-lg p-5 sm:p-6 bg-[#fffaf2] dark:bg-[#1d2521]">
             <header>
                 <p class="text-xs font-bold tracking-[0.2em] text-[#9b8a72] uppercase">
-                    Landing Page
+                    Halaman Utama
                 </p>
                 <h2 class="mt-2 font-serif text-3xl font-bold">
                     Teks Utama & Banner
@@ -67,11 +67,11 @@ const removeTimeline = (index: number) => {
                 <div class="grid gap-4">
                     <InputFields
                         v-model="form.settings[0].value"
-                        label="Judul Utama (Hero Title)"
-                        placeholder="Crafting the Perfect Cup..."
+                        label="Judul Utama"
+                        placeholder="Racikan kopi hangat..."
                     />
                     <div class="space-y-1">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-[#7a6a58]">Subjudul (Hero Subtitle)</label>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-[#7a6a58]">Subjudul</label>
                         <textarea
                             v-model="form.settings[1].value"
                             class="w-full bg-[#f1ece3] dark:bg-[#2b3630] border-none rounded-lg p-3 text-sm focus:ring-2 focus:ring-[#9b8a72]"
@@ -93,7 +93,7 @@ const removeTimeline = (index: number) => {
                         </div>
                         <InputFields
                             v-model="form.settings[3].value"
-                            label="Telepon / WhatsApp"
+                            label="Telepon atau WhatsApp"
                             placeholder="0812-..."
                         />
                         <InputFields
@@ -127,7 +127,7 @@ const removeTimeline = (index: number) => {
             <header class="flex items-center justify-between">
                 <div>
                     <p class="text-xs font-bold tracking-[0.2em] text-[#9b8a72] uppercase">
-                        Halaman About Us
+                        Halaman Tentang
                     </p>
                     <h2 class="mt-2 font-serif text-3xl font-bold">
                         Sejarah (Timeline)

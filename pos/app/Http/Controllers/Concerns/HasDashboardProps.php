@@ -24,22 +24,27 @@ trait HasDashboardProps
         $user = request()->user();
 
         $nav = [
-            ['label' => 'Dashboard / Dasbor', 'href' => route('dashboard.overview'), 'key' => 'overview'],
-            ['label' => 'Orders / Pesanan', 'href' => route('dashboard.orders'), 'key' => 'orders'],
-            ['label' => 'Inventory / Stok', 'href' => route('dashboard.inventory'), 'key' => 'inventory'],
+            ['label' => 'Dasbor', 'href' => route('dashboard.overview'), 'key' => 'overview'],
+            ['label' => 'Pesanan', 'href' => route('dashboard.orders'), 'key' => 'orders'],
+            ['label' => 'Stok', 'href' => route('dashboard.inventory'), 'key' => 'inventory'],
         ];
 
         if (in_array($user->role, [Role::SuperAdmin, Role::Admin])) {
-            $nav[] = ['label' => 'Tables / Meja', 'href' => route('dashboard.tables'), 'key' => 'tables'];
-            $nav[] = ['label' => 'Reports / Laporan', 'href' => route('dashboard.reports'), 'key' => 'reports'];
+            $nav[] = ['label' => 'Meja', 'href' => route('dashboard.tables'), 'key' => 'tables'];
+            $nav[] = ['label' => 'Laporan', 'href' => route('dashboard.reports'), 'key' => 'reports'];
         }
 
         $sidebarUtilities = [
-            ['label' => 'Profile / Profil', 'href' => route('dashboard.profile'), 'key' => 'profile'],
+            ['label' => 'Profil', 'href' => route('dashboard.profile'), 'key' => 'profile'],
         ];
 
+        if (in_array($user->role, [Role::SuperAdmin, Role::Admin])) {
+            $sidebarUtilities[] = ['label' => 'Konten Web', 'href' => route('dashboard.web-content'), 'key' => 'web-content'];
+        }
+
         if ($user->role === Role::SuperAdmin) {
-            $sidebarUtilities[] = ['label' => 'Settings / Pengaturan', 'href' => route('dashboard.settings'), 'key' => 'settings'];
+            $sidebarUtilities[] = ['label' => 'Staf', 'href' => route('dashboard.users'), 'key' => 'users'];
+            $sidebarUtilities[] = ['label' => 'Pengaturan', 'href' => route('dashboard.settings'), 'key' => 'settings'];
         }
 
         return array_merge([
@@ -48,7 +53,24 @@ trait HasDashboardProps
             'analytics' => $this->analytics(),
             'dashboardNav' => $nav,
             'sidebarUtilities' => $sidebarUtilities,
+            'orderSidebar' => $this->orderSidebar(),
         ], $props);
+    }
+
+    protected function orderSidebar(): array
+    {
+        return [
+            'tables' => DiningTable::query()
+                ->where('is_active', true)
+                ->orderBy('floor')
+                ->orderBy('name')
+                ->get(['id', 'name', 'public_token', 'floor', 'capacity']),
+            'menuItems' => MenuItem::query()
+                ->where('is_available', true)
+                ->orderBy('name')
+                ->get(['id', 'name', 'price']),
+            'onlineOrders' => $this->onlineOrders()->values(),
+        ];
     }
 
     protected function roleScope(): array
@@ -109,5 +131,28 @@ trait HasDashboardProps
                 'coordinate_x' => $table->coordinate_x,
                 'coordinate_y' => $table->coordinate_y,
             ]);
+    }
+
+    protected function onlineOrders()
+    {
+        return Order::query()
+            ->with('customer', 'payments', 'diningTable', 'items')
+            ->where('payment_channel', PaymentChannel::Qris->value)
+            ->latest('ordered_at')
+            ->take(8)
+            ->get()
+            ->map(function (Order $order) {
+                return [
+                    'id' => $order->id,
+                    'public_id' => $order->public_id,
+                    'customer' => $order->customer?->name ?? 'Pelanggan',
+                    'payment_status' => $order->payment_status->value,
+                    'total_amount' => $order->total_amount,
+                    'service_type' => 'dine_in',
+                    'table_name' => $order->diningTable?->name ?? 'Tanpa meja',
+                    'floor' => $order->diningTable?->floor,
+                    'quantity' => $order->items->sum('quantity'),
+                ];
+            });
     }
 }

@@ -9,11 +9,11 @@ defineProps<{
 
 <template>
     <div class="grid gap-4 md:grid-cols-2">
-        <InputFields v-model="form.name" label="Nama Table / Nama Meja" placeholder="A1" />
-        <InputFields v-model="form.capacity" label="Capacity / Kapasitas" type="number" placeholder="4" />
+        <InputFields v-model="form.name" label="Nama Meja" placeholder="A1" />
+        <InputFields v-model="form.capacity" label="Kapasitas" type="number" placeholder="4" />
         
         <div>
-            <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-[#9b8a72]">Floor / Lantai</label>
+            <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-[#9b8a72]">Lantai</label>
             <select v-model="form.floor" class="w-full rounded-lg border border-[#3d2b1f]/20 bg-white p-3 text-sm focus:border-brand-gold focus:outline-none dark:bg-[#1d2521] dark:border-[#f7f1e8]/20 dark:text-[#f7f1e8]">
                 <option :value="1">Lantai 1</option>
                 <option :value="2">Lantai 2</option>
@@ -22,8 +22,8 @@ defineProps<{
         </div>
 
         <template v-if="!isEdit">
-            <InputFields v-model="form.coordinate_x" label="Coordinate X / Koordinat X" type="number" placeholder="12" />
-            <InputFields v-model="form.coordinate_y" label="Coordinate Y / Koordinat Y" type="number" placeholder="20" />
+            <InputFields v-model="form.coordinate_x" label="Koordinat X" type="number" placeholder="12" />
+            <InputFields v-model="form.coordinate_y" label="Koordinat Y" type="number" placeholder="20" />
         </template>
 
         <div v-else class="col-span-2">
@@ -35,7 +35,7 @@ defineProps<{
                     :class="form.is_active ? 'bg-[#3d2b1f] text-white' : 'text-[#3d2b1f]'"
                     @click="form.is_active = true"
                 >
-                    Active / Aktif
+                    Aktif
                 </button>
                 <button 
                     type="button"
@@ -43,7 +43,7 @@ defineProps<{
                     :class="!form.is_active ? 'bg-red-600 text-white' : 'text-red-600'"
                     @click="form.is_active = false"
                 >
-                    Inactive / Nonaktif
+                    Nonaktif
                 </button>
             </div>
         </div>

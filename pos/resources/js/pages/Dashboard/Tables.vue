@@ -71,15 +71,15 @@ const deleteTable = (id: number) => {
             <p
                 class="text-xs font-bold tracking-[0.2em] text-[#9b8a72] uppercase"
             >
-                Dining Room
+                Ruang Makan
             </p>
             <h2 class="mt-2 font-serif text-2xl font-bold">
-                Table Control / Kontrol Meja
+                Kontrol Meja
             </h2>
             <p
                 class="mt-3 text-sm leading-6 text-[#6d6255] dark:text-[#c8bdaa]"
             >
-                Kelola QR table, kapasitas, dan koordinat untuk pengalaman order
+                Kelola QR meja, kapasitas, dan koordinat untuk pengalaman pesan
                 mandiri.
             </p>
             <button
@@ -88,13 +88,13 @@ const deleteTable = (id: number) => {
                 @click="openCreateModal"
             >
                 <span class="material-symbols-outlined text-base">add</span>
-                Add Table
+                Tambah Meja
             </button>
         </section>
 
         <section class="rounded-lg p-5 sm:p-6 bg-[#fffaf2] dark:bg-[#1d2521]">
             <div class="gap-4 flex items-center justify-between">
-                <h2 class="font-serif text-2xl font-bold">Tables / Meja</h2>
+                <h2 class="font-serif text-2xl font-bold">Meja</h2>
                 <span
                     class="px-3 py-1 text-xs font-bold rounded-full bg-[#efe8da] tracking-[0.16em] text-[#6d6255] uppercase dark:bg-[#28322e] dark:text-[#c8bdaa]"
                 >
@@ -112,12 +112,12 @@ const deleteTable = (id: number) => {
                             <div class="flex items-center gap-2">
                                 <h3 class="text-lg font-bold">{{ table.name }}</h3>
                                 <span class="rounded-full bg-[#3d2b1f]/10 px-2 py-0.5 text-[10px] font-bold text-[#3d2b1f] dark:bg-[#f7f1e8]/10 dark:text-[#f7f1e8]">Lantai {{ table.floor || 1 }}</span>
-                                <span v-if="!table.is_active" class="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold uppercase text-red-600">Inactive</span>
+                                <span v-if="!table.is_active" class="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold uppercase text-red-600">Nonaktif</span>
                             </div>
                             <p
                                 class="mt-1 text-sm text-[#6d6255] dark:text-[#c8bdaa]"
                             >
-                                Capacity {{ table.capacity }} | ({{
+                                Kapasitas {{ table.capacity }} | ({{
                                     table.coordinate_x
                                 }}, {{ table.coordinate_y }})
                             </p>
@@ -127,21 +127,21 @@ const deleteTable = (id: number) => {
                                 :href="`/qr/${table.public_token}`"
                                 target="_blank"
                                 class="h-9 w-9 flex items-center justify-center rounded-full bg-[#3d2b1f] text-[#f7f1e8] transition-transform hover:scale-110"
-                                title="Open QR / Preview"
+                                title="Buka QR"
                             >
                                 <span class="material-symbols-outlined text-sm">open_in_new</span>
                             </a>
                             <button
                                 class="h-9 w-9 flex items-center justify-center rounded-full bg-[#f1ece3] border border-[#3d2b1f]/20 text-[#3d2b1f] transition-transform hover:scale-110 dark:bg-[#1d2521] dark:text-[#f7f1e8]"
                                 @click="openEditModal(table)"
-                                title="Edit Table"
+                                title="Ubah meja"
                             >
                                 <span class="material-symbols-outlined text-sm">edit</span>
                             </button>
                             <button
                                 class="h-9 w-9 flex items-center justify-center rounded-full bg-red-50 border border-red-200 text-red-600 transition-transform hover:scale-110"
                                 @click="deleteTable(table.id)"
-                                title="Delete Table"
+                                title="Hapus meja"
                             >
                                 <span class="material-symbols-outlined text-sm">delete</span>
                             </button>
@@ -154,7 +154,7 @@ const deleteTable = (id: number) => {
                 <h3
                     class="text-sm font-bold tracking-[0.18em] text-[#63745d] uppercase dark:text-[#c8d9c1]"
                 >
-                    Table Efficiency / Efisiensi Meja
+                    Efisiensi Meja
                 </h3>
                 <div class="mt-4 gap-3 grid">
                     <div
@@ -164,7 +164,7 @@ const deleteTable = (id: number) => {
                     >
                         <strong>{{ table.name }}</strong>
                         <span class="text-sm text-[#6d6255] dark:text-[#c8bdaa]"
-                            >{{ table.order_count }} order |
+                            >{{ table.order_count }} pesanan |
                             {{ table.efficiency }}%</span
                         >
                     </div>
@@ -174,7 +174,7 @@ const deleteTable = (id: number) => {
 
         <FormModal
             :open="tableModal"
-            :title="editingTable ? 'Edit Table / Edit Meja' : 'Add Table / Tambah Meja'"
+            :title="editingTable ? 'Ubah Meja' : 'Tambah Meja'"
             :subtitle="editingTable ? 'Perbarui data meja yang sudah ada' : 'Buat QR dan data meja baru'"
             @close="tableModal = false"
         >
@@ -185,14 +185,14 @@ const deleteTable = (id: number) => {
                     class="px-4 py-3 text-sm font-bold rounded-full bg-[#f1ece3] text-[#3d2b1f] dark:bg-[#28322e] dark:text-[#f7f1e8]"
                     @click="tableModal = false"
                 >
-                    Cancel
+                    Batal
                 </button>
                 <button
                     type="button"
                     class="px-4 py-3 text-sm font-bold rounded-full bg-[#3d2b1f] text-[#f7f1e8]"
                     @click="submitTable"
                 >
-                    {{ editingTable ? 'Update' : 'Save' }}
+                    {{ editingTable ? 'Perbarui' : 'Simpan' }}
                 </button>
             </FormModalActions>
         </FormModal>

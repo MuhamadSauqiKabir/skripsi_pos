@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Management;
 
 use App\Enums\Role;
+use App\Http\Controllers\Concerns\HasDashboardProps;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -15,6 +16,8 @@ use Inertia\Response;
 
 class UserController extends Controller
 {
+    use HasDashboardProps;
+
     public function __construct(
         private readonly \App\Services\AuditLogService $auditLogService,
     ) {
@@ -22,7 +25,7 @@ class UserController extends Controller
 
     public function index(): Response
     {
-        return Inertia::render('Dashboard/Users', [
+        return Inertia::render('Dashboard/Users', $this->baseProps([
             'users' => User::query()
                 ->where('role', '!=', Role::Customer->value)
                 ->latest()
@@ -34,7 +37,7 @@ class UserController extends Controller
                     'label' => $role->label(),
                 ])
                 ->values(),
-        ]);
+        ], 'users'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -65,7 +68,7 @@ class UserController extends Controller
 
         $this->auditLogService->log(auth()->id(), 'user.created', 'user', $user->id, $data, $request);
 
-        return back()->with('success', 'User berhasil ditambahkan.');
+        return back()->with('success', 'Staf berhasil ditambahkan.');
     }
 
     public function update(Request $request, User $user): RedirectResponse
@@ -101,10 +104,10 @@ class UserController extends Controller
 
         $this->auditLogService->log(auth()->id(), 'user.updated', 'user', $user->id, $data, $request);
 
-        return back()->with('success', 'User berhasil diperbarui.');
+        return back()->with('success', 'Staf berhasil diperbarui.');
     }
 
-    public function destroy(User $user): RedirectResponse
+    public function destroy(Request $request, User $user): RedirectResponse
     {
         if ($user->id === auth()->id()) {
             return back()->with('error', 'Anda tidak bisa menghapus akun Anda sendiri.');
@@ -117,6 +120,6 @@ class UserController extends Controller
 
         $user->delete();
 
-        return back()->with('success', 'User berhasil dihapus.');
+        return back()->with('success', 'Staf berhasil dihapus.');
     }
 }

@@ -6,7 +6,11 @@ import PrimeVue from 'primevue/config';
 import { createApp, h } from 'vue';
 import type { DefineComponent } from 'vue';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Nineties Coffee POS';
+const configuredAppName = import.meta.env.VITE_APP_NAME;
+const appName =
+    !configuredAppName || configuredAppName === 'Laravel'
+        ? 'Nineties Coffee POS'
+        : configuredAppName;
 const pages = import.meta.glob<DefineComponent>('./pages/**/*.vue');
 
 createInertiaApp({

@@ -6,7 +6,7 @@ defineProps<{ form: any }>();
 
 <template>
     <div class="grid gap-4">
-        <InputFields v-model="form.name" label="Category Name / Nama Kategori" placeholder="Coffee" />
-        <InputFields v-model="form.description" label="Description / Deskripsi" placeholder="Kategori minuman kopi" />
+        <InputFields v-model="form.name" label="Nama Kategori" placeholder="Kopi" />
+        <InputFields v-model="form.description" label="Deskripsi" placeholder="Kategori minuman kopi" />
     </div>
 </template>

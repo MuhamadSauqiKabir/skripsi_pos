@@ -74,6 +74,7 @@ Route::middleware(['auth'])->group(function (): void {
     // Akses Operasional (Semua Role Staf)
     Route::middleware('role:' . Role::SuperAdmin->value . ',' . Role::Admin->value . ',' . Role::Employee->value)->group(function (): void {
         Route::post('/management/inventory/{ingredient}/adjust', [InventoryController::class, 'adjust'])->name('management.inventory.adjust');
+        Route::post('/management/orders', [OrderController::class, 'store'])->name('management.orders.store');
         Route::patch('/management/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('management.orders.status');
     });
 });

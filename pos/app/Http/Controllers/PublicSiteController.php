@@ -16,7 +16,7 @@ class PublicSiteController extends Controller
         return Inertia::render('Public/Home', $this->sharedProps([
             'featuredMenus' => $this->featuredMenus(),
             'heroContent' => [
-                'title' => $settings->get('landing_hero_title') ?? 'Crafting the Perfect Cup, Every Time.',
+                'title' => $settings->get('landing_hero_title') ?? 'Racikan Kopi Hangat untuk Setiap Cerita.',
                 'subtitle' => $settings->get('landing_hero_subtitle') ?? 'Rasakan harmoni antara biji kopi pilihan dan suasana estetik yang menyatukan setiap cerita.',
             ],
         ], 'home'));
@@ -31,8 +31,8 @@ class PublicSiteController extends Controller
                 ? json_decode($settings->get('about_story_timeline'), true) 
                 : [
                     ['year' => '2018', 'title' => 'Awal Perjalanan', 'description' => 'Nineties Coffee lahir sebagai ruang hangat untuk kopi, cerita, dan kreativitas.'],
-                    ['year' => '2020', 'title' => 'Refining the Craft', 'description' => 'Kami mematangkan karakter rasa, pelayanan, dan identitas visual yang lebih elegan.'],
-                    ['year' => '2026', 'title' => 'Digital Experience', 'description' => 'Kini pengalaman cafe diperluas lewat POS, QR table ordering, dan QRIS realtime.'],
+                    ['year' => '2020', 'title' => 'Mematangkan Rasa', 'description' => 'Kami mematangkan karakter rasa, pelayanan, dan identitas visual yang lebih elegan.'],
+                    ['year' => '2026', 'title' => 'Pengalaman Digital', 'description' => 'Kini pengalaman cafe diperluas lewat sistem kasir, pemesanan QR meja, dan QRIS realtime.'],
                 ],
             'location' => [
                 'address' => $settings->get('shop_address') ?? 'Jl. Senopati No. 90, Jakarta Selatan',
@@ -76,9 +76,9 @@ class PublicSiteController extends Controller
             'currentPage' => $currentPage,
             'publicNav' => [
                 ['label' => 'Beranda', 'href' => route('public.home'), 'key' => 'home'],
-                ['label' => 'About', 'href' => route('public.about'), 'key' => 'about'],
+                ['label' => 'Tentang', 'href' => route('public.about'), 'key' => 'about'],
                 ['label' => 'Pesan/Menu', 'href' => route('public.menu'), 'key' => 'menu'],
-                ['label' => 'Contacts', 'href' => route('public.contact'), 'key' => 'contact'],
+                ['label' => 'Kontak', 'href' => route('public.contact'), 'key' => 'contact'],
             ],
         ], $props);
     }

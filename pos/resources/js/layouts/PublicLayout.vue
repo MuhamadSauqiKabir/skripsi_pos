@@ -71,14 +71,16 @@ const selectLanguage = (value: 'IND' | 'EN') => {
                             :class="{ active: language === 'IND' }"
                             @click="selectLanguage('IND')"
                         >
-                            Indonesia <span v-if="language === 'IND'">✓</span>
+                            Indonesia
+                            <span v-if="language === 'IND'" class="material-symbols-outlined text-base">check</span>
                         </button>
                         <button
                             type="button"
                             :class="{ active: language === 'EN' }"
                             @click="selectLanguage('EN')"
                         >
-                            English <span v-if="language === 'EN'">✓</span>
+                            English
+                            <span v-if="language === 'EN'" class="material-symbols-outlined text-base">check</span>
                         </button>
                     </div>
                 </div>
@@ -106,7 +108,7 @@ const selectLanguage = (value: 'IND' | 'EN') => {
                         {{
                             language === 'EN'
                                 ? 'A warm digital cafe experience connected to QR ordering, payment, and modern POS operations.'
-                                : 'Tempat pulang bagi penikmat kopi, percakapan hangat, dan pengalaman cafe yang terhubung dengan pemesanan QR dan sistem POS modern.'
+                                : 'Tempat pulang bagi penikmat kopi, percakapan hangat, pemesanan QR, pembayaran, dan sistem kasir modern.'
                         }}
                     </p>
                 </div>
@@ -114,7 +116,7 @@ const selectLanguage = (value: 'IND' | 'EN') => {
                     <h4
                         class="text-xs font-semibold tracking-[0.2em] text-[#c9a84c] uppercase"
                     >
-                        Explore
+                        {{ language === 'EN' ? 'Explore' : 'Jelajah' }}
                     </h4>
                     <div class="mt-4 gap-3 text-sm text-white/70 grid">
                         <Link href="/">{{ labels.home }}</Link>
@@ -127,7 +129,7 @@ const selectLanguage = (value: 'IND' | 'EN') => {
                     <h4
                         class="text-xs font-semibold tracking-[0.2em] text-[#c9a84c] uppercase"
                     >
-                        Contact
+                        {{ language === 'EN' ? 'Contact' : 'Kontak' }}
                     </h4>
                     <div class="mt-4 gap-3 text-sm text-white/70 grid">
                         <p>Jl. Senopati No. 90, Jakarta Selatan</p>

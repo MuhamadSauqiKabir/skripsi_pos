@@ -15,6 +15,15 @@ enum OrderStatus: string
 
     public function label(): string
     {
-        return str($this->value)->replace('_', ' ')->title()->toString();
+        return match ($this) {
+            self::Pending => 'Menunggu',
+            self::AwaitingPayment => 'Menunggu Pembayaran',
+            self::Paid => 'Dibayar',
+            self::Brewing => 'Diracik',
+            self::Ready => 'Siap Diambil',
+            self::Completed => 'Selesai',
+            self::Cancelled => 'Dibatalkan',
+            self::Expired => 'Kadaluarsa',
+        };
     }
 }

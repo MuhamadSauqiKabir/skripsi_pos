@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import FormModal from '@/components/FormModal.vue';
+import FormModalActions from '@/components/FormModalActions.vue';
+import ImageUploadEditor from '@/components/ImageUploadEditor.vue';
 import InputFields from '@/components/InputFields.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useForm, usePage } from '@inertiajs/vue3';
@@ -7,10 +10,8 @@ import { update as updateProfile } from '@/actions/App/Http/Controllers/Manageme
 
 defineOptions({ layout: AppLayout });
 
-const props = defineProps<{}>();
-
 const page = usePage<{
-    auth: { user?: { id: number; name?: string; role?: string; email?: string } };
+    auth: { user?: { id: number; name?: string; role?: string; email?: string; avatar?: string } };
 }>();
 
 const user = computed(() => page.props.auth.user);
@@ -27,6 +28,8 @@ const form = useForm({
     avatar: null as any,
 });
 
+const profileModal = ref(false);
+
 const submit = () => {
     form.transform((data) => ({
         ...data,
@@ -34,7 +37,7 @@ const submit = () => {
     })).post(updateProfile().url, {
         preserveScroll: true,
         onSuccess: () => {
-            // Optional: reset file input or preview if needed
+            profileModal.value = false;
         },
     });
 };
@@ -44,18 +47,13 @@ const initials = computed(() => {
     return name.split(' ').filter(Boolean).map((word) => word[0]).join('').slice(0, 2).toUpperCase();
 });
 
-const avatarPreview = ref<string | null>(null);
-const onFileChange = (e: any) => {
-    const file = e.target.files[0];
-    if (file) {
-        form.avatar = file;
-        avatarPreview.value = URL.createObjectURL(file);
-    }
-};
+const avatarPreviewUrl = computed(() =>
+    user.value?.avatar ? `/storage/${user.value.avatar}` : null,
+);
 </script>
 
 <template>
-    <div class="gap-5 xl:grid-cols-[minmax(0,1fr)_380px] grid">
+    <div class="space-y-5">
         <section class="rounded-lg p-5 sm:p-6 bg-[#fffaf2] dark:bg-[#1d2521]">
             <div
                 class="gap-5 md:flex-row md:items-center md:justify-between flex flex-col"
@@ -64,28 +62,39 @@ const onFileChange = (e: any) => {
                     <p
                         class="text-xs font-bold tracking-[0.2em] text-[#9b8a72] uppercase"
                     >
-                        Account
+                        Akun
                     </p>
                     <h2 class="mt-2 font-serif text-3xl font-bold">
-                        Profile / Profil
+                        Profil
                     </h2>
                 </div>
-                <div
-                    class="gap-3 rounded-lg px-4 py-3 flex items-center bg-[#f1ece3] dark:bg-[#28322e]"
-                >
-                    <div class="h-12 w-12 overflow-hidden rounded-full border border-white/20 bg-[#d6b35a]">
-                        <img v-if="user?.avatar" :src="`/storage/${user.avatar}`" class="h-full w-full object-cover" />
-                        <span v-else class="h-full w-full font-black flex items-center justify-center text-[#211b16]">
-                            {{ initials }}
-                        </span>
-                    </div>
-                    <div>
-                        <strong class="block">{{
-                            user?.name || 'Admin'
-                        }}</strong>
-                        <span class="text-sm text-[#6d6255] dark:text-[#c8bdaa]">{{
-                            user?.role || 'staff'
-                        }}</span>
+                <div class="flex flex-wrap items-center gap-3">
+                    <button
+                        v-if="canManage"
+                        type="button"
+                        class="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#3d2b1f] px-5 text-sm font-bold text-[#f7f1e8]"
+                        @click="profileModal = true"
+                    >
+                        <span class="material-symbols-outlined text-base">edit</span>
+                        Ubah Profil
+                    </button>
+                    <div
+                        class="gap-3 rounded-lg px-4 py-3 flex items-center bg-[#f1ece3] dark:bg-[#28322e]"
+                    >
+                        <div class="h-12 w-12 overflow-hidden rounded-full border border-white/20 bg-[#d6b35a]">
+                            <img v-if="user?.avatar" :src="`/storage/${user.avatar}`" class="h-full w-full object-cover" />
+                            <span v-else class="h-full w-full font-black flex items-center justify-center text-[#211b16]">
+                                {{ initials }}
+                            </span>
+                        </div>
+                        <div>
+                            <strong class="block">{{
+                                user?.name || 'Admin'
+                            }}</strong>
+                            <span class="text-sm text-[#6d6255] dark:text-[#c8bdaa]">{{
+                                user?.role || 'staf'
+                            }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -94,13 +103,13 @@ const onFileChange = (e: any) => {
                 <div class="grid gap-3 md:grid-cols-2">
                     <div class="rounded-lg p-5 bg-[#f1ece3] dark:bg-[#28322e]">
                         <p class="text-xs font-bold tracking-[0.18em] text-[#9b8a72] uppercase">
-                            Full Name / Nama
+                            Nama Lengkap
                         </p>
                         <strong class="mt-3 text-xl block">{{ user?.name }}</strong>
                     </div>
                     <div class="rounded-lg p-5 bg-[#e5eddf] text-[#273528] dark:bg-[#24342b] dark:text-[#edf7e8]">
                         <p class="text-xs font-bold tracking-[0.18em] text-[#63745d] uppercase dark:text-[#c8d9c1]">
-                            Email Address
+                            Alamat Email
                         </p>
                         <strong class="mt-3 text-xl block">{{ user?.email }}</strong>
                     </div>
@@ -110,7 +119,7 @@ const onFileChange = (e: any) => {
                     <div class="flex items-start gap-3">
                         <span class="material-symbols-outlined text-[#d6b35a]">badge</span>
                         <div>
-                            <strong class="block text-sm">Identity Note</strong>
+                            <strong class="block text-sm">Catatan Identitas</strong>
                             <p class="mt-1 text-xs leading-relaxed">Nama di atas akan digunakan pada struk pesanan dan laporan aktivitas transaksi untuk keperluan audit internal.</p>
                         </div>
                     </div>
@@ -129,43 +138,46 @@ const onFileChange = (e: any) => {
             </div>
         </section>
 
-        <!-- Form Edit Khusus Admin & Super Admin -->
-        <aside v-if="canManage" class="rounded-lg p-5 sm:p-6 bg-[#fffaf2] dark:bg-[#1d2521]">
-            <h3 class="font-serif text-xl font-bold">Edit Profile / Data Diri</h3>
-            <p class="mt-2 text-sm text-[#6d6255] dark:text-[#c8bdaa]">Perbarui informasi lengkap Anda di sini.</p>
-
-            <form @submit.prevent="submit" class="mt-6 gap-5 grid">
-                <div class="flex flex-col items-center gap-3">
-                     <div class="h-24 w-24 overflow-hidden rounded-full border-2 border-[#3d2b1f]/10 bg-[#f1ece3]">
-                        <img v-if="avatarPreview" :src="avatarPreview" class="h-full w-full object-cover" />
-                        <img v-else-if="user?.avatar" :src="`/storage/${user.avatar}`" class="h-full w-full object-cover" />
-                        <div v-else class="flex h-full w-full items-center justify-center text-gray-400">
-                            <span class="material-symbols-outlined text-3xl">add_a_photo</span>
-                        </div>
-                    </div>
-                    <input type="file" @change="onFileChange" class="hidden" ref="fileInput" accept="image/*" />
-                    <button type="button" @click="($refs.fileInput as any).click()" class="text-xs font-bold text-[#3d2b1f] hover:underline">
-                        Pilih Foto Baru
-                    </button>
-                </div>
-
+        <FormModal
+            :open="profileModal"
+            title="Ubah Data Diri"
+            subtitle="Perbarui informasi profil Anda"
+            @close="profileModal = false"
+        >
+            <form class="grid gap-5" @submit.prevent="submit">
+                <ImageUploadEditor
+                    v-model="form.avatar"
+                    label="Foto Profil"
+                    :preview-url="avatarPreviewUrl"
+                    :aspect-ratio="1"
+                    :output-width="512"
+                    :output-height="512"
+                    rounded-preview
+                />
                 <InputFields
                     v-model="form.name"
-                    label="Display Name / Nama Staf"
+                    label="Nama Staf"
                     placeholder="Masukkan nama..."
                     :error="form.errors.name"
                 />
 
-
-
-                <button
-                    type="submit"
-                    class="mt-4 min-h-11 w-full font-bold rounded-full bg-[#3d2b1f] text-[#f7f1e8] disabled:opacity-50 transition-all hover:bg-[#2c1a0e]"
-                    :disabled="form.processing"
-                >
-                    {{ form.processing ? 'Saving...' : 'Save Data Diri' }}
-                </button>
+                <FormModalActions>
+                    <button
+                        type="button"
+                        class="px-4 py-3 text-sm font-bold rounded-full bg-[#f1ece3] text-[#3d2b1f] dark:bg-[#28322e] dark:text-[#f7f1e8]"
+                        @click="profileModal = false"
+                    >
+                        Batal
+                    </button>
+                    <button
+                        type="submit"
+                        class="px-4 py-3 text-sm font-bold rounded-full bg-[#3d2b1f] text-[#f7f1e8] disabled:opacity-50"
+                        :disabled="form.processing"
+                    >
+                        {{ form.processing ? 'Menyimpan...' : 'Simpan Data Diri' }}
+                    </button>
+                </FormModalActions>
             </form>
-        </aside>
+        </FormModal>
     </div>
 </template>

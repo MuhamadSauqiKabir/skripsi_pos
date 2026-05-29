@@ -15,47 +15,18 @@ const form = useForm({
     remember: true,
 });
 
-const selectDemo = (email: string) => {
-    form.email = email;
-    form.password = 'password';
-};
-
 const submit = () => {
     form.post('/login');
 };
 </script>
 
 <template>
-    <Head title="Staff Login" />
+    <Head title="Masuk Staf" />
 
     <form class="gap-4 grid" @submit.prevent="submit">
         <div class="nineties-auth-heading">
-            <p>Internal Access</p>
+            <p>Akses Internal</p>
             <h2>Masuk ke Dashboard</h2>
-        </div>
-
-        <div class="gap-2 grid grid-cols-3">
-            <button
-                type="button"
-                class="px-2 py-2 text-xs font-bold rounded-full border-2 border-[#c9a84c] bg-[#f5e6b8] text-[#a07830]"
-                @click="selectDemo('superadmin@nineties.id')"
-            >
-                Super Admin
-            </button>
-            <button
-                type="button"
-                class="px-2 py-2 text-xs font-bold rounded-full border-2 border-[#f5e6c8] bg-[#fdf6e3] text-[#9c7c5a]"
-                @click="selectDemo('admin@nineties.id')"
-            >
-                Admin
-            </button>
-            <button
-                type="button"
-                class="px-2 py-2 text-xs font-bold rounded-full border-2 border-[#f5e6c8] bg-[#fdf6e3] text-[#9c7c5a]"
-                @click="selectDemo('employee@nineties.id')"
-            >
-                Karyawan
-            </button>
         </div>
 
         <label class="nineties-field">
@@ -70,13 +41,13 @@ const submit = () => {
         </label>
 
         <label class="nineties-field">
-            <span>Password</span>
+            <span>Kata Sandi</span>
             <input
                 v-model="form.password"
                 class="nineties-input"
                 type="password"
                 autocomplete="current-password"
-                placeholder="Masukkan password"
+                placeholder="Masukkan kata sandi"
             />
         </label>
 
@@ -93,7 +64,7 @@ const submit = () => {
                 v-if="canResetPassword"
                 href="/forgot-password"
                 class="nineties-auth-link"
-                >Lupa password?</Link
+                >Lupa kata sandi?</Link
             >
         </div>
 
@@ -105,18 +76,6 @@ const submit = () => {
             <span class="material-symbols-outlined text-base">lock_open</span>
             {{ form.processing ? 'Memproses...' : 'Masuk ke Dashboard' }}
         </button>
-
-        <div class="nineties-auth-note">
-            <strong>Akun Uji Coba:</strong> superadmin@nineties.id / password<br />
-            Gunakan tombol cepat di atas untuk mengisi form secara otomatis.
-        </div>
-
-        <p class="text-sm text-center text-[#9c7c5a]">
-            Belum punya akun?
-            <Link href="/register" class="nineties-auth-link"
-                >Daftar staff</Link
-            >
-        </p>
 
         <p
             v-if="status"

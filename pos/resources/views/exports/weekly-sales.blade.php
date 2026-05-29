@@ -15,33 +15,33 @@
     </thead>
     <tbody>
         <tr>
-            <td>Total Pendapatan (Revenue)</td>
+            <td>Total Pendapatan</td>
             <td>{{ $report['revenue'] }}</td>
             <td>IDR</td>
         </tr>
         <tr>
-            <td>Total Keuntungan (Gross Profit)</td>
+            <td>Total Keuntungan Kotor</td>
             <td>{{ $report['gross_profit'] }}</td>
             <td>IDR</td>
         </tr>
         <tr>
-            <td>Total Pesanan (Total Orders)</td>
+            <td>Total Pesanan</td>
             <td>{{ $report['total_orders'] }}</td>
             <td>Pesanan</td>
         </tr>
         <tr>
-            <td>Rata-rata Rating (Avg Rating)</td>
+            <td>Rata-rata Rating</td>
             <td>{{ $report['average_rating'] }}</td>
             <td>/ 5.0</td>
         </tr>
         <tr><th></th></tr>
         <tr>
-            <th colspan="3" style="font-weight: bold; background-color: #3d2b1f; color: #ffffff;">DAFTAR MENU TERLARIS (TOP 10)</th>
+            <th colspan="3" style="font-weight: bold; background-color: #3d2b1f; color: #ffffff;">DAFTAR MENU TERLARIS</th>
         </tr>
         <tr>
             <th style="font-weight: bold; background-color: #f3f3f3;">Nama Menu</th>
             <th style="font-weight: bold; background-color: #f3f3f3;">Kuantitas Terjual</th>
-            <th style="font-weight: bold; background-color: #f3f3f3;">Total Penjualan (Sales)</th>
+            <th style="font-weight: bold; background-color: #f3f3f3;">Total Penjualan</th>
         </tr>
         @foreach ($report['top_menus'] as $menu)
             <tr>

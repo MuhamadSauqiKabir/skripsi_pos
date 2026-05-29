@@ -4,6 +4,20 @@ import { useForm, Link } from '@inertiajs/vue3';
 
 defineOptions({ layout: CustomerLayout });
 
+type SnapResult = Record<string, unknown>;
+
+type MidtransSnap = {
+    pay: (
+        token: string,
+        callbacks: {
+            onSuccess?: (result: SnapResult) => void;
+            onPending?: (result: SnapResult) => void;
+            onError?: (result: SnapResult) => void;
+            onClose?: () => void;
+        },
+    ) => void;
+};
+
 const props = defineProps<{
     order: any;
     payment: any;
@@ -19,13 +33,15 @@ const submitFeedback = () => feedbackForm.post(`/tracking/${props.order.public_i
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
 const payNow = () => {
-    if (typeof window.snap === 'undefined') {
-        alert('Midtrans Snap is not loaded yet. Please refresh the page.');
+    const snap = (window as Window & { snap?: MidtransSnap }).snap;
+
+    if (!snap) {
+        alert('Pembayaran belum siap. Silakan muat ulang halaman.');
         return;
     }
 
-    window.snap.pay(props.payment.provider_payment_id, {
-        onSuccess: async function (result) {
+    snap.pay(props.payment.provider_payment_id, {
+        onSuccess: async function (_result: SnapResult) {
             // Verify payment on server and update order status
             try {
                 await fetch(`/orders/${props.order.id}/verify-payment`, {
@@ -40,10 +56,10 @@ const payNow = () => {
             }
             window.location.reload();
         },
-        onPending: function (result) {
+        onPending: function (_result: SnapResult) {
             window.location.reload();
         },
-        onError: function (result) {
+        onError: function (_result: SnapResult) {
             alert('Pembayaran gagal, silakan coba lagi.');
         },
         onClose: async function () {

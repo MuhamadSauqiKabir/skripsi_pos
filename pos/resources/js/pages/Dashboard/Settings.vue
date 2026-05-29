@@ -12,7 +12,7 @@ const currentSettings = page.props.settings || {};
 const form = useForm({
     settings: [
         { key: 'shop_name', value: currentSettings.shop_name || 'Nineties' },
-        { key: 'shop_tagline', value: currentSettings.shop_tagline || 'Coffee POS' },
+        { key: 'shop_tagline', value: currentSettings.shop_tagline || 'Sistem Kasir' },
         { key: 'tax_rate', value: currentSettings.tax_rate || '11' },
     ],
 });
@@ -29,10 +29,10 @@ const submit = () => {
         <section class="rounded-lg p-5 sm:p-6 bg-[#fffaf2] dark:bg-[#1d2521]">
             <header>
                 <p class="text-xs font-bold tracking-[0.2em] text-[#9b8a72] uppercase">
-                    Core Configuration
+                    Konfigurasi Inti
                 </p>
                 <h2 class="mt-2 font-serif text-3xl font-bold">
-                    General Settings
+                    Pengaturan Umum
                 </h2>
             </header>
 
@@ -41,21 +41,21 @@ const submit = () => {
                     <div class="col-span-full">
                         <InputFields
                             v-model="form.settings[0].value"
-                            label="Shop Name / Nama Toko"
+                            label="Nama Toko"
                             placeholder="Nineties Coffee"
                         />
                     </div>
                     <div class="col-span-full">
                         <InputFields
                             v-model="form.settings[1].value"
-                            label="Tagline / Slogan"
-                            placeholder="The Art of Coffee"
+                            label="Slogan"
+                            placeholder="Seni Meracik Kopi"
                         />
                     </div>
                     <div>
                         <InputFields
                             v-model="form.settings[2].value"
-                            label="Tax Rate (%) / Pajak"
+                            label="Pajak (%)"
                             type="number"
                             placeholder="11"
                         />
@@ -69,7 +69,7 @@ const submit = () => {
                         :disabled="form.processing"
                         class="px-8 py-3 rounded-full bg-[#3d2b1f] text-[#f7f2e8] font-bold text-sm transition-opacity hover:opacity-90 disabled:opacity-50"
                     >
-                        {{ form.processing ? 'Saving...' : 'Save Configuration' }}
+                        {{ form.processing ? 'Menyimpan...' : 'Simpan Pengaturan' }}
                     </button>
                 </div>
             </form>
@@ -78,30 +78,30 @@ const submit = () => {
         <section class="rounded-lg p-5 sm:p-6 bg-[#fffaf2] dark:bg-[#1d2521]">
             <header>
                 <p class="text-xs font-bold tracking-[0.2em] text-[#9b8a72] uppercase">
-                    Environment
+                    Lingkungan Sistem
                 </p>
                 <h2 class="mt-2 font-serif text-3xl font-bold">
-                    System Health
+                    Kesehatan Sistem
                 </h2>
             </header>
             
             <div class="mt-8 space-y-4">
                 <div class="p-4 rounded-lg bg-[#f1ece3] flex items-center justify-between">
-                    <span>Database Connection</span>
-                    <span class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold uppercase">Connected</span>
+                    <span>Koneksi Database</span>
+                    <span class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold uppercase">Terhubung</span>
                 </div>
                 <div class="p-4 rounded-lg bg-[#f1ece3] flex items-center justify-between">
-                    <span>Storage Driver</span>
+                    <span>Penyimpanan</span>
                     <span class="font-mono text-sm text-[#7a6a58]">local</span>
                 </div>
                 <div class="p-4 rounded-lg bg-[#f1ece3] flex items-center justify-between">
-                    <span>Environment</span>
+                    <span>Mode Aplikasi</span>
                     <span class="font-mono text-sm text-[#7a6a58]">development</span>
                 </div>
             </div>
 
             <div class="mt-8 p-5 rounded-lg bg-[#3d2b1f] text-[#f7f2e8]">
-                <h4 class="font-serif text-lg font-bold mb-2">Audit Transparency</h4>
+                <h4 class="font-serif text-lg font-bold mb-2">Transparansi Audit</h4>
                 <p class="text-sm text-[#f7f2e8]/70 leading-relaxed">
                     Setiap perubahan konfigurasi dicatat dalam sistem audit log untuk keamanan dan transparansi operasional.
                 </p>
